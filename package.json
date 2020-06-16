@@ -1,0 +1,19 @@
+{
+  "name": "first_app",
+  "version": "1.0.0",
+  "description": "Première app electron",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "AGoubs",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^8.2.1"
+  },
+  "dependencies": {
+    "app": "^0.1.0",
+    "eml-format": "^0.6.1",
+    "jquery": "^3.5.0"
+  }
+}
