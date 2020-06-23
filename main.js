@@ -79,7 +79,9 @@ ipcMain.on('mail_select', (event, uid) => {
       html = html.replace("%%OBJECT%%", mail.html);
     }
     else {
-      // html = html.replace("%%OBJECT%%", mail.text);
+      
+      html = html.replace("%%OBJECT%%", ('<pre style="white-space: pre-line;">' + mail.text + '</pre>'));
+      console.log(html);
     }
 
     win.webContents.send('mail_return', html);
