@@ -1,15 +1,40 @@
 {
-  "name": "first_app",
-  "version": "1.0.0",
-  "description": "Première app electron",
+  "build": {
+    "appId": "com.electron.mel",
+    "win": {
+      "icon": "icones/mel.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "linux": {
+      "category": "Utility",
+      "icon": "icones/mel.png",
+      "target": [
+        "deb"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "asar": false
+  },
+  "name": "Mel",
+  "productName": "Messagerie Mel",
+  "version": "0.1.0",
+  "description": "Courrielleur nouvelle generation",
+  "homepage": "https://github.com/messagerie-melanie2/mel-electron",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder"
   },
-  "author": "AGoubs",
+  "author": "AGoubs <arnaud.goubier@i-carre.net>",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^8.2.1"
+    "electron": "^8.2.1",
+    "electron-builder": "^22.7.0"
   },
   "dependencies": {
     "app": "^0.1.0",
