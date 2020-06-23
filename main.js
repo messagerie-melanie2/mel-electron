@@ -34,6 +34,7 @@ ipcMain.on('read_mail_dir', (event, msg) => {
   dialog.showOpenDialog(win, {
     properties: ['openDirectory']
   }).then(result => {
+    
     let cols = [];
     let path = result.filePaths[0];
     fs.readdir(path, (err, files) => {
@@ -51,7 +52,6 @@ ipcMain.on('read_mail_dir', (event, msg) => {
         });
       });
       win.webContents.send('mail_dir', cols) // send to web page
-
     });
   })
 })
@@ -65,19 +65,21 @@ ipcMain.on('mail_select', (event, uid) => {
       return
     }
 
+    
     let from = "";
     let mail = mails[uid];
     let html = data.toString();
     html = html.replace("%%SUBJECT%%", mail.subject);
     from = emlformat.getEmailAddress(emlformat.unquotePrintable(mail.from.email));
     html = html.replace("%%FROM%%", from.email);
+    html = html.replace("%%TO%%", mail.to.email);
 
     html = html.replace("%%DATE%%", mail.date.toLocaleString('fr-FR', { timeZone: 'UTC' }));
     if (mail.html != undefined) {
       html = html.replace("%%OBJECT%%", mail.html);
     }
     else {
-      html = html.replace("%%OBJECT%%", mail.text);
+      // html = html.replace("%%OBJECT%%", mail.text);
     }
 
     win.webContents.send('mail_return', html);
