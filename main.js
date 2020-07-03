@@ -63,7 +63,7 @@ function traitementMails(eml, i, path_file) {
       .then(parsed => {
         let date = new Date(parsed.date);
         let date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
-        resolve({ "id": i, "subject": parsed.subject, "fromto": parsed.from.value[0].address, "date": date_fr, "name": parsed.from.value[0].name, "to": parsed.to.value[0].address, "path_file": path_file });
+        resolve({ "id": i, "subject": parsed.subject, "fromto": parsed.from.value[0].address, "date": date_fr, "name": parsed.from.value[0].name, "to": parsed.to.value, "path_file": path_file });
       })
       .catch(err => { });
   })
@@ -78,6 +78,8 @@ ipcMain.on('mail_select', (event, uid) => {
     }
 
     let promise1 = [];
+    let address = "";
+    let virgule = "";
     let mail = cols[uid];
     let eml = fs.readFileSync(mail.path_file, 'utf8');
 
@@ -89,7 +91,11 @@ ipcMain.on('mail_select', (event, uid) => {
         html = html.replace("%%SUBJECT%%", mail.subject);
         html = html.replace("%%FROM_NAME%%", mail.name);
         html = html.replace("%%FROM%%", mail.fromto);
-        html = html.replace("%%TO%%", mail.to);
+        mail.to.forEach(value => {
+          address +=  virgule + "<span class='adr'><a href='#' class='rcmContactAddress'>" + value.address + "</a></span>";
+          virgule = ", ";
+        })
+        html = html.replace("%%TO%%", address);          
         html = html.replace("%%DATE%%", mail.date);
         html = html.replace("%%OBJECT%%", object);
         win.webContents.send('mail_return', html);
