@@ -40,9 +40,10 @@ ipcMain.on('read_mail_dir', (event, msg) => {
     let path = result.filePaths[0];
     fs.readdir(path, (err, files) => {
       files.forEach(file => {
-        let eml = fs.readFileSync(path + '/' + file, 'utf8');
+        let path_file = path + '/' + file;
+        let eml = fs.readFileSync(path_file, 'utf8');
         i++;
-        promises.push(traitementMails(eml, i))
+        promises.push(traitementMails(eml, i, path_file))
       });
       Promise.all(promises)
         .then((result) => {
@@ -54,13 +55,13 @@ ipcMain.on('read_mail_dir', (event, msg) => {
   })
 })
 
-function traitementMails(eml, i) {
+function traitementMails(eml, i, path_file) {
   return new Promise((resolve) => {
     simpleParser(eml)
       .then(parsed => {
         let date = new Date(parsed.date);
         let date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
-        resolve({ "id": i, "subject": parsed.subject, "fromto": parsed.from.value[0].address, "date": date_fr, "name": parsed.from.value[0].name, "to": parsed.to.value[0].address});
+        resolve({ "id": i, "subject": parsed.subject, "fromto": parsed.from.value[0].address, "date": date_fr, "name": parsed.from.value[0].name, "to": parsed.to.value[0].address, "path_file": path_file });
       })
       .catch(err => { });
   })
@@ -75,6 +76,12 @@ ipcMain.on('mail_select', (event, uid) => {
     }
 
     let mail = cols[uid];
+    let object;
+    let eml = fs.readFileSync(mail.path_file, 'utf8');
+
+    emlformat.read(eml, function (error, data) {
+      object = data;
+    });
 
     let html = data.toString();
     html = html.replace("%%SUBJECT%%", mail.subject);
@@ -82,8 +89,7 @@ ipcMain.on('mail_select', (event, uid) => {
     html = html.replace("%%FROM%%", mail.fromto);
     html = html.replace("%%TO%%", mail.to);
     html = html.replace("%%DATE%%", mail.date);
-    html = html.replace("%%OBJECT%%", mail.text)
-    // (mail.html != undefined) ? html = html.replace("%%OBJECT%%", mail.html) : html = html.replace("%%OBJECT%%", ('<pre style="white-space: pre-line;">' + mail.text + '</pre>'));
+    (object.html != undefined) ? html = html.replace("%%OBJECT%%", object.html) : html = html.replace("%%OBJECT%%", ('<pre style="white-space: pre-line;">' + mail.text + '</pre>'));
 
     win.webContents.send('mail_return', html);
   })
