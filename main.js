@@ -60,7 +60,7 @@ function traitementMails(eml, i) {
       .then(parsed => {
         let date = new Date(parsed.date);
         let date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
-        resolve({ "id": i, "subject": parsed.subject, "fromto": parsed.from.value[0].address, "date": date_fr, "name": parsed.from.value[0].name, "to": parsed.to.value[0].address, "text": parsed.textAsHtml});
+        resolve({ "id": i, "subject": parsed.subject, "fromto": parsed.from.value[0].address, "date": date_fr, "name": parsed.from.value[0].name, "to": parsed.to.value[0].address});
       })
       .catch(err => { });
   })
