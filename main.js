@@ -48,6 +48,10 @@ ipcMain.on('read_mail_dir', (event, msg) => {
         i++;
         promises.push(traitementCols(eml, i, path_file))
       });
+
+   
+
+
       Promise.all(promises)
         .then((result) => {
           cols = result;
@@ -190,7 +194,8 @@ function constructionMail(result, data) {
   let date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
   html = html.replace("%%DATE%%", date_fr);
 
-  html = html.replace("%%OBJECT%%", result[0].object);
+  const regex = /(<style(.*?)*)(\n.*?)*<\/style>/;
+  html = html.replace("%%OBJECT%%", result[0].object.replace(regex, ""));
 
   return html;
 }
