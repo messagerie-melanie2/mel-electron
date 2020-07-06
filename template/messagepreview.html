@@ -58,10 +58,7 @@
 
 		<table id="preview-allheaders" class="headers-table">
 			<tbody>
-				<tr>
-					<td class="header-title">A</td>
-					<td class="header to">%%TO%%</td>
-				</tr>
+				%%TOCC%%
 			</tbody>
 		</table>
 
@@ -81,7 +78,10 @@
 				<roundcube:label name="arialabelmessagebody" />
 			</h2>
 			<roundcube:object name="messageObjects" id="message-objects" />
-			<div class="messagebody">%%OBJECT%%</div>
+
+			<html>
+				<div class="messagebody">%%OBJECT%%</div>
+			</html>
 		</div>
 	</div>
 
