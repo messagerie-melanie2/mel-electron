@@ -49,9 +49,6 @@ ipcMain.on('read_mail_dir', (event, msg) => {
         promises.push(traitementCols(eml, i, path_file))
       });
 
-   
-
-
       Promise.all(promises)
         .then((result) => {
           cols = result;
@@ -86,7 +83,7 @@ ipcMain.on('mail_select', (event, uid) => {
 
 
 
-//Parsage du mail pour afficher la liste
+//Parsage du mail pour afficher dans la liste
 function traitementCols(eml, i, path_file) {
   return new Promise((resolve) => {
     simpleParser(eml)
@@ -113,8 +110,16 @@ function traitementMail(eml) {
     });
     mailparser.on("data", function (mail_object) {
       if (mail_object.type === 'attachment') {
-        mail_object.content.pipe(process.stdout);
-        mail_object.content.on('end', () => mail_object.release());
+        let bufs = [];
+
+        mail_object.content.on('data', function (d) { bufs.push(d); });
+        mail_object.content.on('end', function () {
+          var buf = Buffer.concat(bufs);
+          console.log(buf);
+          
+          mail_object.release()
+        });
+
       }
       if (mail_object.type === 'text') {
         (mail_object.html == undefined) ? object = mail_object.textAsHtml : object = mail_object.html;
