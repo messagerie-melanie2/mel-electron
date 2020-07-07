@@ -33,7 +33,7 @@
   "author": "AGoubs <arnaud.goubier@i-carre.net>",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^8.2.1",
+    "electron": "^8.2.4",
     "electron-builder": "^22.7.0"
   },
   "dependencies": {
