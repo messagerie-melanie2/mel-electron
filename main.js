@@ -63,9 +63,8 @@ ipcMain.on('attachment_select', (event, uid) => {
   promiseAttachment.push(traitementAttachment(eml));
 
   Promise.all(promiseAttachment)
-    .then((attachment) => {
-      console.log(attachment);
-      promiseAttachment = [];
+    .then((result) => {
+      console.log(result);
     }).catch((e) => { })
   // shell.openPath('/tmp/test.pdf');
   // fs.writeFile('/tmp/test.pdf', element['buf'], (err) => {
@@ -185,27 +184,31 @@ function traitementMail(eml) {
 //Parsage du mail pour récupérer les pièces jointes
 function traitementAttachment(eml) {
   return new Promise((resolve) => {
-    let attachment = {};
     var mailparser = new MailParser();
+    let attachment_content = {};
+    mailparser.on("headers", function (headers) {
+    });
     mailparser.on("data", function (mail_object) {
       if (mail_object.type === 'attachment') {
-        if (mail_object.contentDisposition == 'attachment') {
-          let bufs = [];
+        let bufs = [];
 
-          attachment.contentDisposition = mail_object.contentDisposition;
+        attachment_content.contentDisposition = mail_object.contentDisposition;
 
-          attachment.filename = mail_object.filename;
-          attachment.ctype = mail_object.contentType;
+        attachment_content.cid = mail_object.cid;
+        attachment_content.ctype = mail_object.contentType;
+        attachment_content.filename = mail_object.filename;
+        attachment_content.size = mail_object.size;
 
-          mail_object.content.on('data', function (d) {
-            bufs.push(d);
-          });
-          mail_object.content.on('end', function () {
-            attachment.buf = Buffer.concat(bufs);
-          });
+        mail_object.content.on('data', function (d) {
+          bufs.push(d);
+        });
+        mail_object.content.on('end', function () {
+          attachment_content.buf = Buffer.concat(bufs);
           mail_object.release()
-          resolve(attachment);
-        }
+        });
+      }
+      if (mail_object.type === 'text') {
+        resolve(attachment_content);
       }
     });
     mailparser.write(eml);
