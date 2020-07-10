@@ -213,7 +213,7 @@ function constructionMail(result, data) {
   html = html.replace("%%OBJECT%%", result[0].object.replace(regex, ""));
 
   //Traitement des pièces jointes
-  console.log(result[0].attachments);
+  // console.log(result[0].attachments); 
 
   if (result[0].attachments != []) {
     result[0].attachments.forEach(element => {
@@ -222,9 +222,12 @@ function constructionMail(result, data) {
       }
       else {
         let filename = element['filename'];
-        let size = (element['size'] != undefined) ? '(' + element['size'] + ')' : "";
+        let size = (element['size'] != undefined) ? '(~' + element['size'] + ')' : "";
+        let ctype = element['ctype'].split('/');
+        console.log(ctype);
+
         html = html.replace('style="display: none;"', '');
-        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application pdf'><a href='#' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
+        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
       }
     })
   }
