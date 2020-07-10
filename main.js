@@ -1,10 +1,8 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const fs = require('fs');
 const path = require('path');
-const emlformat = require('eml-format');
 const simpleParser = require('mailparser').simpleParser;
-
-var MailParser = require("mailparser").MailParser;
+let MailParser = require("mailparser").MailParser;
 
 
 app.commandLine.appendSwitch('ignore-certificate-errors');
@@ -85,7 +83,9 @@ ipcMain.on('mail_select', (event, uid) => {
 
 //Parsage du mail pour afficher dans la liste
 function traitementCols(eml, i, path_file) {
+  
   return new Promise((resolve) => {
+    console.log(path_file);
     simpleParser(eml)
       .then(parsed => {
         let date = new Date(parsed.date);
