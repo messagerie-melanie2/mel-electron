@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron')
+const { app, BrowserWindow, dialog, ipcMain, Menu } = require('electron')
 const fs = require('fs');
 const path = require('path');
 const simpleParser = require('mailparser').simpleParser;
@@ -12,7 +12,7 @@ let promises = [];
 
 let win;
 
-async function createWindow() {
+function createWindow() {
 
   // Create the browser window.
   win = new BrowserWindow({
@@ -27,12 +27,38 @@ async function createWindow() {
   });
   win.maximize();
   win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
-
-  // win.webContents.openDevTools();
+  const template = [
+    {
+      label: 'Developper',
+      submenu: [
+        {
+          label: 'Go back',
+          click() {
+            win.webContents.goBack();
+          }
+        },
+        {
+          label: 'Dev Tools',
+          click() {
+            win.webContents.toggleDevTools();
+          }
+        }
+      ]
+    }
+  ];
+  const menu = Menu.buildFromTemplate(template);
+  // Menu.setApplicationMenu(menu);
 }
 
 let i = -1;
 app.on("ready", createWindow);
+
+
+ipcMain.on('attachment_select', (event, msg) => {
+  win.loadFile('/tmp/test.pdf');
+
+})
+
 
 ipcMain.on('read_mail_dir', (event, msg) => {
   dialog.showOpenDialog(win, {
@@ -79,13 +105,10 @@ ipcMain.on('mail_select', (event, uid) => {
   })
 });
 
-
-
 //Parsage du mail pour afficher dans la liste
 function traitementCols(eml, i, path_file) {
-  
+
   return new Promise((resolve) => {
-    console.log(path_file);
     simpleParser(eml)
       .then(parsed => {
         let date = new Date(parsed.date);
@@ -224,10 +247,15 @@ function constructionMail(result, data) {
         let filename = element['filename'];
         let size = (element['size'] != undefined) ? '(~' + element['size'] + ')' : "";
         let ctype = element['ctype'].split('/');
-        console.log(ctype);
 
         html = html.replace('style="display: none;"', '');
-        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
+        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' id='attachment' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
+
+        fs.writeFile('test.pdf', element['buf'], (err) => {
+          if (err) throw err;
+          console.log('file saved');
+        })
+        // win.loadFile('test.pdf');
       }
     })
   }
