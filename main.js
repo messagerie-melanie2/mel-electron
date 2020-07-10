@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const simpleParser = require('mailparser').simpleParser;
 let MailParser = require("mailparser").MailParser;
-
+const shell = require('electron').shell;
 
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
@@ -54,9 +54,25 @@ let i = -1;
 app.on("ready", createWindow);
 
 
-ipcMain.on('attachment_select', (event, msg) => {
-  win.loadFile('/tmp/test.pdf');
+ipcMain.on('attachment_select', (event, uid) => {
+  let promiseAttachment = [];
 
+  let mail = cols[uid];
+  let eml = fs.readFileSync(mail.path_file, 'utf8');
+
+  promiseAttachment.push(traitementAttachment(eml));
+
+  Promise.all(promiseAttachment)
+    .then((attachment) => {
+      console.log(attachment);
+      promiseAttachment = [];
+    }).catch((e) => { })
+  // shell.openPath('/tmp/test.pdf');
+  // fs.writeFile('/tmp/test.pdf', element['buf'], (err) => {
+  //   if (err) throw err;
+  //   console.log('file saved');
+  // })
+  // // win.loadFile('test.pdf');
 })
 
 
@@ -90,14 +106,14 @@ ipcMain.on('mail_select', (event, uid) => {
       return
     }
 
-    let promise1 = [];
+    let promise = [];
 
     let mail = cols[uid];
     let eml = fs.readFileSync(mail.path_file, 'utf8');
 
-    promise1.push(traitementMail(eml));
+    promise.push(traitementMail(eml));
 
-    Promise.all(promise1)
+    Promise.all(promise)
       .then((mail_content) => {
         let html = constructionMail(mail_content, data);
         win.webContents.send('mail_return', html);
@@ -137,6 +153,8 @@ function traitementMail(eml) {
         let bufs = [];
         let attachment_content = [];
 
+        attachment_content['contentDisposition'] = mail_object.contentDisposition;
+
         attachment_content['cid'] = mail_object.cid;
         attachment_content['ctype'] = mail_object.contentType;
         attachment_content['filename'] = mail_object.filename;
@@ -150,7 +168,6 @@ function traitementMail(eml) {
           attachments.push(attachment_content);
           mail_object.release()
         });
-
       }
       if (mail_object.type === 'text') {
         (mail_object.html == undefined) ? object = mail_object.textAsHtml : object = mail_object.html;
@@ -158,6 +175,37 @@ function traitementMail(eml) {
 
         mail_content.attachments = attachments;
         resolve(mail_content);
+      }
+    });
+    mailparser.write(eml);
+    mailparser.end();
+  })
+}
+
+//Parsage du mail pour récupérer les pièces jointes
+function traitementAttachment(eml) {
+  return new Promise((resolve) => {
+    let attachment = {};
+    var mailparser = new MailParser();
+    mailparser.on("data", function (mail_object) {
+      if (mail_object.type === 'attachment') {
+        if (mail_object.contentDisposition == 'attachment') {
+          let bufs = [];
+
+          attachment.contentDisposition = mail_object.contentDisposition;
+
+          attachment.filename = mail_object.filename;
+          attachment.ctype = mail_object.contentType;
+
+          mail_object.content.on('data', function (d) {
+            bufs.push(d);
+          });
+          mail_object.content.on('end', function () {
+            attachment.buf = Buffer.concat(bufs);
+          });
+          mail_object.release()
+          resolve(attachment);
+        }
       }
     });
     mailparser.write(eml);
@@ -240,7 +288,7 @@ function constructionMail(result, data) {
 
   if (result[0].attachments != []) {
     result[0].attachments.forEach(element => {
-      if (element['ctype'] == 'image/png' || element['ctype'] == 'image/jpeg') {
+      if (element['contentDisposition'] == "inline") {
         html = html.replace('cid:' + element['cid'], "data:" + element['ctype'] + ";base64, " + element['buf'].toString('base64'));
       }
       else {
@@ -250,12 +298,6 @@ function constructionMail(result, data) {
 
         html = html.replace('style="display: none;"', '');
         html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' id='attachment' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
-
-        fs.writeFile('test.pdf', element['buf'], (err) => {
-          if (err) throw err;
-          console.log('file saved');
-        })
-        // win.loadFile('test.pdf');
       }
     })
   }
