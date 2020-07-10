@@ -99,6 +99,7 @@ function traitementCols(eml, i, path_file) {
 //Parsage du mail pour récupérer les infos
 function traitementMail(eml) {
   return new Promise((resolve) => {
+    let attachments = [];
     let mail_content = {};
     var mailparser = new MailParser();
     mailparser.on("headers", function (headers) {
@@ -111,12 +112,19 @@ function traitementMail(eml) {
     mailparser.on("data", function (mail_object) {
       if (mail_object.type === 'attachment') {
         let bufs = [];
+        let attachment_content = [];
 
-        mail_object.content.on('data', function (d) { bufs.push(d); });
+        attachment_content['cid'] = mail_object.cid;
+        attachment_content['ctype'] = mail_object.contentType;
+        attachment_content['filename'] = mail_object.filename;
+        attachment_content['size'] = mail_object.size;
+
+        mail_object.content.on('data', function (d) {
+          bufs.push(d);
+        });
         mail_object.content.on('end', function () {
-          var buf = Buffer.concat(bufs);
-          console.log(buf);
-          
+          attachment_content['buf'] = Buffer.concat(bufs);
+          attachments.push(attachment_content);
           mail_object.release()
         });
 
@@ -124,6 +132,8 @@ function traitementMail(eml) {
       if (mail_object.type === 'text') {
         (mail_object.html == undefined) ? object = mail_object.textAsHtml : object = mail_object.html;
         mail_content.object = object;
+
+        mail_content.attachments = attachments;
         resolve(mail_content);
       }
     });
@@ -202,5 +212,23 @@ function constructionMail(result, data) {
   const regex = /(<style(.*?)*)(\n.*?)*<\/style>/;
   html = html.replace("%%OBJECT%%", result[0].object.replace(regex, ""));
 
+  //Traitement des pièces jointes
+  console.log(result[0].attachments);
+
+  if (result[0].attachments != []) {
+    result[0].attachments.forEach(element => {
+      if (element['ctype'] == 'image/png' || element['ctype'] == 'image/jpeg') {
+        html = html.replace('cid:' + element['cid'], "data:" + element['ctype'] + ";base64, " + element['buf'].toString('base64'));
+      }
+      else {
+        let filename = element['filename'];
+        let size = (element['size'] != undefined) ? '(' + element['size'] + ')' : "";
+        html = html.replace('style="display: none;"', '');
+        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application pdf'><a href='#' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
+      }
+    })
+  }
+
+  html = html.replace('%%ATTACHMENT%%', '');
   return html;
 }
