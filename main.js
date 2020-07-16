@@ -255,7 +255,6 @@ function constructionMail(result, data) {
           if (err) throw err;
           console.log('file saved');
         })
-        // win.loadFile('test.pdf');
       }
     })
   }
