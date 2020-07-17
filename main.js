@@ -47,6 +47,7 @@ ipcMain.on('attachment_select', (event, uid) => {
       title: 'Ouverture de ' + result.filename,
       message: 'Que doit faire Mél avec ce fichier ?',
     };
+    win.webContents.send('busy-loader')
     dialog.showMessageBox(null, options).then(response => {
       //Si on ouvre
       if (response.response === 1) {
