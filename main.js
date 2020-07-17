@@ -240,7 +240,7 @@ function constructionMail(result, data) {
 
   if (result[0].attachments != []) {
     result[0].attachments.forEach(element => {
-      if (element['ctype'] == 'image/png' || element['ctype'] == 'image/jpeg') {
+      if (element['contentDisposition'] == "inline") {
         html = html.replace('cid:' + element['cid'], "data:" + element['ctype'] + ";base64, " + element['buf'].toString('base64'));
       }
       else {
@@ -249,12 +249,7 @@ function constructionMail(result, data) {
         let ctype = element['ctype'].split('/');
 
         html = html.replace('style="display: none;"', '');
-        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' id='attachment' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
-
-        fs.writeFile('test.pdf', element['buf'], (err) => {
-          if (err) throw err;
-          console.log('file saved');
-        })
+        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + ")' id='attachment' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
       }
     })
   }
