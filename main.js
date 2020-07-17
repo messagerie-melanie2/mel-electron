@@ -27,27 +27,6 @@ function createWindow() {
   });
   win.maximize();
   win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
-  const template = [
-    {
-      label: 'Developper',
-      submenu: [
-        {
-          label: 'Go back',
-          click() {
-            win.webContents.goBack();
-          }
-        },
-        {
-          label: 'Dev Tools',
-          click() {
-            win.webContents.toggleDevTools();
-          }
-        }
-      ]
-    }
-  ];
-  const menu = Menu.buildFromTemplate(template);
-  // Menu.setApplicationMenu(menu);
 }
 
 let i = -1;
@@ -55,17 +34,16 @@ app.on("ready", createWindow);
 
 
 ipcMain.on('attachment_select', (event, uid) => {
-  let promiseAttachment = [];
+  console.log(uid);
 
   let mail = cols[uid];
   let eml = fs.readFileSync(mail.path_file, 'utf8');
 
-  promiseAttachment.push(traitementAttachment(eml));
+  let promise = traitementAttachment(eml);
 
-  Promise.all(promiseAttachment)
-    .then((result) => {
-      console.log(result);
-    }).catch((e) => { })
+  promise.then((result) => {
+    console.log(result);
+  })
   // shell.openPath('/tmp/test.pdf');
   // fs.writeFile('/tmp/test.pdf', element['buf'], (err) => {
   //   if (err) throw err;
@@ -114,7 +92,7 @@ ipcMain.on('mail_select', (event, uid) => {
 
     Promise.all(promise)
       .then((mail_content) => {
-        let html = constructionMail(mail_content, data);
+        let html = constructionMail(mail_content, data, uid);
         win.webContents.send('mail_return', html);
       }).catch((e) => { })
   })
@@ -186,8 +164,6 @@ function traitementAttachment(eml) {
   return new Promise((resolve) => {
     var mailparser = new MailParser();
     let attachment_content = {};
-    mailparser.on("headers", function (headers) {
-    });
     mailparser.on("data", function (mail_object) {
       if (mail_object.type === 'attachment') {
         let bufs = [];
@@ -217,7 +193,7 @@ function traitementAttachment(eml) {
 }
 
 //Assemblage du mail et du html
-function constructionMail(result, data) {
+function constructionMail(result, data, uid) {
   let to = "";
   let cc = "";
   let i = 0;
@@ -287,7 +263,7 @@ function constructionMail(result, data) {
   html = html.replace("%%OBJECT%%", result[0].object.replace(regex, ""));
 
   //Traitement des pièces jointes
-  // console.log(result[0].attachments); 
+  // console.log(result[0]);
 
   if (result[0].attachments != []) {
     result[0].attachments.forEach(element => {
@@ -300,7 +276,7 @@ function constructionMail(result, data) {
         let ctype = element['ctype'].split('/');
 
         html = html.replace('style="display: none;"', '');
-        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' id='attachment' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
+        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + ")' id='attachment' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
       }
     })
   }
