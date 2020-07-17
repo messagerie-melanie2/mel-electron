@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, Menu } = require('electron')
+const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const fs = require('fs');
 const path = require('path');
 const simpleParser = require('mailparser').simpleParser;
@@ -28,28 +28,51 @@ function createWindow() {
   win.maximize();
   win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
 }
-
 let i = -1;
 app.on("ready", createWindow);
 
 
 ipcMain.on('attachment_select', (event, uid) => {
-  console.log(uid);
-
   let mail = cols[uid];
   let eml = fs.readFileSync(mail.path_file, 'utf8');
 
   let promise = traitementAttachment(eml);
 
   promise.then((result) => {
-    console.log(result);
+    let path = app.getPath("temp") + '/' + result.filename;
+
+    const options = {
+      type: 'question',
+      buttons: ['Ouvrir', 'Enregistrer le fichier'],
+      defaultId: 0,
+      title: 'Ouverture de ' + result.filename,
+      message: 'Que doit faire Mél avec ce fichier ?',
+    };
+    dialog.showMessageBox(null, options).then(response => {
+      //Si on ouvre
+      if (response.response === 0) {
+        fs.writeFileSync(path, result.buf, (err) => {
+          if (err) throw err;
+        })
+        shell.openPath(path);
+      }
+      //Si on enregistre
+      else if (response.response === 1) {
+        const options = {
+          title: "Enregistrer un fichier",
+          defaultPath: app.getPath('documents') + '/' + result.filename,
+        }
+        dialog.showSaveDialog(null, options).then(response => {
+          fs.writeFileSync(response.filePath, result.buf, (err) => {
+            if (err) throw err;
+          })
+          shell.openPath(response.filePath);          
+        });
+      }
+    });
+
+
   })
-  // shell.openPath('/tmp/test.pdf');
-  // fs.writeFile('/tmp/test.pdf', element['buf'], (err) => {
-  //   if (err) throw err;
-  //   console.log('file saved');
-  // })
-  // // win.loadFile('test.pdf');
 })
 
 
