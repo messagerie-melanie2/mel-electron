@@ -43,21 +43,20 @@ ipcMain.on('attachment_select', (event, uid) => {
 
     const options = {
       type: 'question',
-      buttons: ['Ouvrir', 'Enregistrer le fichier'],
-      defaultId: 0,
+      buttons: ['Cancel', 'Ouvrir', 'Enregistrer'],
       title: 'Ouverture de ' + result.filename,
       message: 'Que doit faire Mél avec ce fichier ?',
     };
     dialog.showMessageBox(null, options).then(response => {
       //Si on ouvre
-      if (response.response === 0) {
+      if (response.response === 1) {
         fs.writeFileSync(path, result.buf, (err) => {
           if (err) throw err;
         })
         shell.openPath(path);
       }
       //Si on enregistre
-      else if (response.response === 1) {
+      else if (response.response === 2) {
         const options = {
           title: "Enregistrer un fichier",
           defaultPath: app.getPath('documents') + '/' + result.filename,
@@ -66,7 +65,7 @@ ipcMain.on('attachment_select', (event, uid) => {
           fs.writeFileSync(response.filePath, result.buf, (err) => {
             if (err) throw err;
           })
-          shell.openPath(response.filePath);          
+          shell.openPath(response.filePath);
         });
       }
     });
@@ -123,15 +122,20 @@ ipcMain.on('mail_select', (event, uid) => {
 
 //Parsage du mail pour afficher dans la liste
 function traitementCols(eml, i, path_file) {
-
   return new Promise((resolve) => {
-    simpleParser(eml)
-      .then(parsed => {
-        let date = new Date(parsed.date);
-        let date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
-        resolve({ "id": i, "subject": parsed.subject, "fromto": parsed.from.value[0].address, "date": date_fr, "path_file": path_file });
-      })
-      .catch(err => { });
+    let subject = ""; 
+    let from = ""; 
+    let date_fr = ""; 
+    let mailparser = new MailParser();
+    mailparser.on("headers", function (headers) {
+      subject = headers.get('subject');
+      from = headers.get('from');
+      let date = new Date(headers.get('date'));
+      date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
+      resolve({ "id": i, "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file });
+    });
+    mailparser.write(eml);
+    mailparser.end();
   })
 }
 
