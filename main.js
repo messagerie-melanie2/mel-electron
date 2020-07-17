@@ -124,9 +124,9 @@ ipcMain.on('mail_select', (event, uid) => {
 //Parsage du mail pour afficher dans la liste
 function traitementCols(eml, i, path_file) {
   return new Promise((resolve) => {
-    let subject = ""; 
-    let from = ""; 
-    let date_fr = ""; 
+    let subject = "";
+    let from = "";
+    let date_fr = "";
     let mailparser = new MailParser();
     mailparser.on("headers", function (headers) {
       subject = headers.get('subject');
@@ -163,7 +163,7 @@ function traitementMail(eml) {
         attachment_content['cid'] = mail_object.cid;
         attachment_content['ctype'] = mail_object.contentType;
         attachment_content['filename'] = mail_object.filename;
-        attachment_content['size'] = mail_object.size;
+
 
         mail_object.content.on('data', function (d) {
           bufs.push(d);
@@ -201,7 +201,6 @@ function traitementAttachment(eml) {
         attachment_content.cid = mail_object.cid;
         attachment_content.ctype = mail_object.contentType;
         attachment_content.filename = mail_object.filename;
-        attachment_content.size = mail_object.size;
 
         mail_object.content.on('data', function (d) {
           bufs.push(d);
@@ -291,7 +290,7 @@ function constructionMail(result, data, uid) {
   html = html.replace("%%OBJECT%%", result[0].object.replace(regex, ""));
 
   //Traitement des pièces jointes
-  // console.log(result[0]);
+  console.log(result[0]);
 
   if (result[0].attachments != []) {
     result[0].attachments.forEach(element => {
@@ -300,15 +299,27 @@ function constructionMail(result, data, uid) {
       }
       else {
         let filename = element['filename'];
-        let size = (element['size'] != undefined) ? '(~' + element['size'] + ')' : "";
         let ctype = element['ctype'].split('/');
+        let size = " (~" + formatBytes(element['buf'].toString().length, 0) + ")";
 
         html = html.replace('style="display: none;"', '');
-        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + ")' id='attachment' title='" + filename + "'>" + filename + "<span class='attachment-size'>" + size + "</span></a></li>%%ATTACHMENT%%");
+        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + ")' id='attachment' title='" + filename + size + "'>" + filename + size + "</a></li>%%ATTACHMENT%%");
       }
     })
   }
 
   html = html.replace('%%ATTACHMENT%%', '');
   return html;
+}
+
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'Ko', 'Mo', 'Go', 'To', 'Po', 'Eo', 'Zo', 'Yo'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
