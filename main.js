@@ -1,7 +1,6 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const fs = require('fs');
 const path = require('path');
-const simpleParser = require('mailparser').simpleParser;
 let MailParser = require("mailparser").MailParser;
 const shell = require('electron').shell;
 
@@ -13,7 +12,6 @@ let promises = [];
 let win;
 
 function createWindow() {
-
   // Create the browser window.
   win = new BrowserWindow({
     width: 800,
@@ -27,10 +25,35 @@ function createWindow() {
   });
   win.maximize();
   win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
+
+  indexationArchive();
 }
+
 let i = -1;
 app.on("ready", createWindow);
 
+function indexationArchive() {
+  let path_archive = app.getPath("userData") + "/Mails Archive";
+  if (fs.existsSync(path_archive)) {
+    fs.readdir(path_archive, (err, files) => {
+      files.forEach(file => {
+        let path_file = path_archive + '/' + file;
+        let eml = fs.readFileSync(path_file, 'utf8');
+        i++;
+        promises.push(traitementCols(eml, i, path_file))
+      });
+
+      Promise.all(promises)
+        .then((result) => {
+          cols = result;          
+          // win.webContents.send('mail_dir', result) // send to web page
+        }).catch((e) => { })
+    });
+  }
+  else {
+    fs.mkdirSync(path_archive);
+  }
+}
 
 ipcMain.on('attachment_select', (event, uid) => {
   let mail = cols[uid];
@@ -77,25 +100,7 @@ ipcMain.on('attachment_select', (event, uid) => {
 
 
 ipcMain.on('read_mail_dir', (event, msg) => {
-  dialog.showOpenDialog(win, {
-    properties: ['openDirectory']
-  }).then(result => {
-    let path = result.filePaths[0];
-    fs.readdir(path, (err, files) => {
-      files.forEach(file => {
-        let path_file = path + '/' + file;
-        let eml = fs.readFileSync(path_file, 'utf8');
-        i++;
-        promises.push(traitementCols(eml, i, path_file))
-      });
 
-      Promise.all(promises)
-        .then((result) => {
-          cols = result;
-          win.webContents.send('mail_dir', result) // send to web page
-        }).catch((e) => { })
-    });
-  })
 })
 
 
@@ -133,7 +138,13 @@ function traitementCols(eml, i, path_file) {
       from = headers.get('from');
       let date = new Date(headers.get('date'));
       date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
-      resolve({ "id": i, "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file });
+      try {
+        resolve({ "break": 0, "id": i, "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file });
+      }
+      catch (error) {
+        console.log(error);
+        resolve({ "break": 1 });
+      };
     });
     mailparser.write(eml);
     mailparser.end();
