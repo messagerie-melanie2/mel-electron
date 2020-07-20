@@ -5,12 +5,6 @@ let MailParser = require("mailparser").MailParser;
 const shell = require('electron').shell;
 let sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db')
-let knex = require('knex')({
-  client: 'sqlite3',
-  connection: { filename: app.getPath("userData") + '/archivage_mails.db' },
-  useNullAsDefault: true,
-})
-
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
 let cols = [];
@@ -35,6 +29,9 @@ function createWindow() {
   win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
 }
 
+
+
+
 app.on("ready", createWindow);
 
 indexationArchive();
@@ -45,13 +42,14 @@ function indexationArchive() {
   if (fs.existsSync(path_archive)) {
     fs.readdir(path_archive, (err, files) => {
       let filePromise = new Promise((resolve, reject) => {
+        console.log("debut de lecture des fichiers");
         files.forEach((file, index, array) => {
           try {
             let path_file = path_archive + '/' + file;
             new Promise((resolve) => {
-              fs.readFile(path_file, 'utf8', (err, data) => {
+              fs.readFile(path_file, 'utf8', (err, eml) => {
                 if (err) throw err;
-                resolve(data);
+                resolve(eml);
               });
             }).then((eml) => {
               promises.push(traitementCols(eml, index, path_file));
@@ -65,29 +63,23 @@ function indexationArchive() {
       });
 
       filePromise.then(() => {
+        console.log("fin de lecture des fichiers");
         Promise.all(promises)
           .then((result) => {
+            console.log("Debut promise All");
             cols = result;
+
             // Create a table
-            knex.schema.hasTable('cols').then(function (exists) {
-              if (!exists) {
-                knex.schema
-                  .createTable('cols', (table) => {
-                    table.increments('id')
-                    table.string('subject')
-                    table.string('fromto')
-                    table.string('date')
-                    table.string('path_file').unique()
-                    table.boolean('break')
-                  })
-                  .then(() =>
-                    knex('cols').insert(result)
-                  )
-                  .catch(e => {
-                    console.error(e);
-                  });
-              }
+            db.serialize(function () {
+              db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date TEXT, path_file TEXT UNIQUE, break TEXT, modif_date TEXT)');
+              result.forEach((element) => {                
+                db.run("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)", element.id, element.subject, element.fromto, element.date, element.path_file, element.break, element.modif_date);
+              });
             });
+            db.close();
+
+            console.log("Fin promise All");
+
           }).catch((e) => { console.error(e); })
       });
     });
@@ -169,7 +161,7 @@ ipcMain.on('mail_select', (event, uid) => {
 });
 
 //Parsage du mail pour afficher dans la liste
-function traitementCols(eml, i, path_file) {
+function traitementCols(eml, index, path_file) {
   return new Promise((resolve) => {
     let subject = "";
     let from = "";
@@ -181,10 +173,10 @@ function traitementCols(eml, i, path_file) {
       let date = new Date(headers.get('date'));
       date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
       try {
-        resolve({ "id": i, "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0 });
+        resolve({ "id": index, "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0, modif_date: "TETS" });
       }
       catch (error) {
-        resolve({ "id": i, "subject": "", "fromto": "", "date": "", "path_file": "", "break": 1 });
+        resolve({ "id": index, "subject": "", "fromto": "", "date": "", "path_file": "", "break": 1, modif_date: "TETS" });
       };
     });
     mailparser.write(eml);
