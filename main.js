@@ -3,16 +3,18 @@ const fs = require('fs');
 const path = require('path');
 let MailParser = require("mailparser").MailParser;
 const shell = require('electron').shell;
-let knex = require("knex")({
-  client: "sqlite3",
-  connection: {
-    filename: "./database.sqlite"
-  }
-});
+let sqlite3 = require('sqlite3').verbose();
+let db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db')
+let knex = require('knex')({
+  client: 'sqlite3',
+  connection: { filename: app.getPath("userData") + '/archivage_mails.db' },
+  useNullAsDefault: true,
+})
 
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
 let cols = [];
+let promisesFile = [];
 let promises = [];
 
 let win;
@@ -29,31 +31,65 @@ function createWindow() {
       preload: path.resolve(`${__dirname}/src/preload.js`),
     }
   });
-  win.maximize();
+  // win.maximize();
   win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
-
-  indexationArchive();
 }
 
-let i = -1;
 app.on("ready", createWindow);
+
+indexationArchive();
 
 function indexationArchive() {
   let path_archive = app.getPath("userData") + "/Mails Archive";
+  // let path_archive = "/home/arnaud/Documents/Mails2/";
   if (fs.existsSync(path_archive)) {
     fs.readdir(path_archive, (err, files) => {
-      files.forEach(file => {
-        let path_file = path_archive + '/' + file;
-        let eml = fs.readFileSync(path_file, 'utf8');
-        i++;
-        promises.push(traitementCols(eml, i, path_file))
+      let filePromise = new Promise((resolve, reject) => {
+        files.forEach((file, index, array) => {
+          try {
+            let path_file = path_archive + '/' + file;
+            new Promise((resolve) => {
+              fs.readFile(path_file, 'utf8', (err, data) => {
+                if (err) throw err;
+                resolve(data);
+              });
+            }).then((eml) => {
+              promises.push(traitementCols(eml, index, path_file));
+              if (index === array.length - 1) resolve();
+            })
+          }
+          catch (err) {
+            console.error(err);
+          }
+        });
       });
 
-      Promise.all(promises)
-        .then((result) => {
-          cols = result;          
-          // win.webContents.send('mail_dir', result) // send to web page
-        }).catch((e) => { })
+      filePromise.then(() => {
+        Promise.all(promises)
+          .then((result) => {
+            cols = result;
+            // Create a table
+            knex.schema.hasTable('cols').then(function (exists) {
+              if (!exists) {
+                knex.schema
+                  .createTable('cols', (table) => {
+                    table.increments('id')
+                    table.string('subject')
+                    table.string('fromto')
+                    table.string('date')
+                    table.string('path_file').unique()
+                    table.boolean('break')
+                  })
+                  .then(() =>
+                    knex('cols').insert(result)
+                  )
+                  .catch(e => {
+                    console.error(e);
+                  });
+              }
+            });
+          }).catch((e) => { console.error(e); })
+      });
     });
   }
   else {
@@ -145,11 +181,10 @@ function traitementCols(eml, i, path_file) {
       let date = new Date(headers.get('date'));
       date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
       try {
-        resolve({ "break": 0, "id": i, "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file });
+        resolve({ "id": i, "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0 });
       }
       catch (error) {
-        console.log(error);
-        resolve({ "break": 1 });
+        resolve({ "id": i, "subject": "", "fromto": "", "date": "", "path_file": "", "break": 1 });
       };
     });
     mailparser.write(eml);
