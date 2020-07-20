@@ -3,6 +3,12 @@ const fs = require('fs');
 const path = require('path');
 let MailParser = require("mailparser").MailParser;
 const shell = require('electron').shell;
+let knex = require("knex")({
+  client: "sqlite3",
+  connection: {
+    filename: "./database.sqlite"
+  }
+});
 
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
