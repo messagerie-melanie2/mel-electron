@@ -28,13 +28,15 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "rebuild": "electron-rebuild -f -w sqlite3",
     "dist": "electron-builder"
   },
   "author": "AGoubs <arnaud.goubier@i-carre.net>",
   "license": "ISC",
   "devDependencies": {
     "electron": "^9.1.0",
-    "electron-builder": "^22.7.0"
+    "electron-builder": "^22.7.0",
+    "electron-rebuild": "^1.11.0"
   },
   "dependencies": {
     "app": "^0.1.0",
