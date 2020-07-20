@@ -53,7 +53,9 @@ function indexationArchive() {
               });
             }).then((eml) => {
               promises.push(traitementCols(eml, index, path_file));
-              if (index === array.length - 1) resolve();
+              if (index === array.length - 1) {
+                resolve()
+              };
             })
           }
           catch (err) {
@@ -69,11 +71,27 @@ function indexationArchive() {
             console.log("Debut promise All");
             cols = result;
 
-            // Create a table
+            // Create a table            
+            let modif_date_folder = new Date(fs.statSync(path_archive).mtime).getTime();
+            let date_db = "";
             db.serialize(function () {
-              db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date TEXT, path_file TEXT UNIQUE, break TEXT, modif_date TEXT)');
-              result.forEach((element) => {                
-                db.run("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)", element.id, element.subject, element.fromto, element.date, element.path_file, element.break, element.modif_date);
+
+              db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date TEXT, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
+
+              db.get(sql, [playlistId], (err, row) => {
+                if (err) {
+                  return console.error(err.message);
+                }
+                return row
+                  ? console.log(row.id, row.name)
+                  : console.log(`No playlist found with the id ${playlistId}`);
+              });
+
+              result.forEach((element) => {
+                console.log(date_db);
+                db.run("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)", element.id, element.subject, element.fromto, element.date, element.path_file, element.break, modif_date_folder, (err) => {
+                  //  if (err) console.log(err);
+                });
               });
             });
             db.close();
@@ -88,6 +106,8 @@ function indexationArchive() {
     fs.mkdirSync(path_archive);
   }
 }
+
+
 
 ipcMain.on('attachment_select', (event, uid) => {
   let mail = cols[uid];
@@ -173,10 +193,10 @@ function traitementCols(eml, index, path_file) {
       let date = new Date(headers.get('date'));
       date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
       try {
-        resolve({ "id": index, "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0, modif_date: "TETS" });
+        resolve({ "id": index, "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0 });
       }
       catch (error) {
-        resolve({ "id": index, "subject": "", "fromto": "", "date": "", "path_file": "", "break": 1, modif_date: "TETS" });
+        resolve({ "id": index, "subject": "", "fromto": "", "date": "", "path_file": "", "break": 1 });
       };
     });
     mailparser.write(eml);
