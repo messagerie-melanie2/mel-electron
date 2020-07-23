@@ -5,10 +5,10 @@ let MailParser = require("mailparser").MailParser;
 const shell = require('electron').shell;
 let sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db')
+
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
 let cols = [];
-let promisesFile = [];
 let promises = [];
 
 let win;
@@ -26,11 +26,9 @@ function createWindow() {
     }
   });
   // win.maximize();
-  win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
+  // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
+  win.webContents.loadURL('http://localhost/roundcube');
 }
-
-
-
 
 app.on("ready", createWindow);
 
@@ -38,10 +36,9 @@ indexationArchive();
 
 function indexationArchive() {
   let path_archive = app.getPath("userData") + "/Mails Archive";
-  // let path_archive = "/home/arnaud/Documents/Mails2/";
   if (fs.existsSync(path_archive)) {
     fs.readdir(path_archive, (err, files) => {
-      let filePromise = new Promise((resolve, reject) => {
+      new Promise((resolve, reject) => {
         console.log("debut de lecture des fichiers");
         files.forEach((file, index, array) => {
           try {
@@ -62,9 +59,7 @@ function indexationArchive() {
             console.error(err);
           }
         });
-      });
-
-      filePromise.then(() => {
+      }).then(() => {
         console.log("fin de lecture des fichiers");
         Promise.all(promises)
           .then((result) => {
@@ -75,26 +70,50 @@ function indexationArchive() {
             let modif_date_folder = new Date(fs.statSync(path_archive).mtime).getTime();
             let date_db = "";
             db.serialize(function () {
-
               db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date TEXT, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
 
-              db.get(sql, [playlistId], (err, row) => {
-                if (err) {
-                  return console.error(err.message);
+              var sql = "SELECT MAX(modif_date) as modif_date FROM cols";
+              db.get(sql, function (err, row) {
+                if (err) throw err;
+                if (row.modif_date === null) {
+                  //si aucune données dans la bdd
+                  result.forEach((element) => {
+                    db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, element.break, modif_date_folder).finalize();
+                  });
+                } else {
+                  if (modif_date_folder > row.modif_date) {
+                    //besoin de mettre à jour
+                    console.log("debut de lecture des stats des fichiers");
+                    files.forEach((file, index, array) => {
+                      try {
+                        let path_file = path_archive + '/' + file;
+                        new Promise((resolve) => {
+                          resolve(new Date(fs.statSync(path_file).mtime).getTime());
+                        }).then((date_file) => {
+                          if (date_file > row.modif_date) {
+                            //on l'insere dans bdd
+                            new Promise((resolve) => {
+                              fs.readFile(path_file, 'utf8', (err, eml) => {
+                                if (err) throw err;
+                                resolve(eml);
+                              });
+                            }).then((eml) => {
+                              promises.push(traitementCols(eml, index, path_file));
+                              if (index === array.length - 1) {
+                                resolve()
+                              };
+                            })
+                          }
+                        })
+                      }
+                      catch (err) {
+                        console.error(err);
+                      }
+                    });
+                  }
                 }
-                return row
-                  ? console.log(row.id, row.name)
-                  : console.log(`No playlist found with the id ${playlistId}`);
-              });
-
-              result.forEach((element) => {
-                console.log(date_db);
-                db.run("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)", element.id, element.subject, element.fromto, element.date, element.path_file, element.break, modif_date_folder, (err) => {
-                  //  if (err) console.log(err);
-                });
               });
             });
-            db.close();
 
             console.log("Fin promise All");
 
