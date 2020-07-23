@@ -72,8 +72,7 @@ function indexationArchive() {
             db.serialize(function () {
               db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date TEXT, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
 
-              var sql = "SELECT MAX(modif_date) as modif_date FROM cols";
-              db.get(sql, function (err, row) {
+              db.get("SELECT MAX(modif_date) as modif_date FROM cols", function (err, row) {
                 if (err) throw err;
                 if (row.modif_date === null) {
                   //si aucune données dans la bdd
@@ -98,10 +97,21 @@ function indexationArchive() {
                                 resolve(eml);
                               });
                             }).then((eml) => {
-                              promises.push(traitementCols(eml, index, path_file));
-                              if (index === array.length - 1) {
-                                resolve()
-                              };
+                              traitementCols(eml, index, path_file).then((value) => {
+                                db.get("SELECT * FROM cols WHERE path_file = ?", value.path_file, function (err, row) {
+                                  if (err) throw err;
+                                  //Si value.path existe dans bdd -> UPDATE
+                                  console.log(row);
+                                  if (typeof row != 'undefined') {
+                                    console.log('update');
+                                    db.prepare("UPDATE cols SET subject = ?, fromto = ?, date = ?, break = ?, modif_date = ? WHERE path_file = ?").run(row.subject, row.fromto, row.date, row.break, modif_date_folder, path_file).finalize();
+                                  }
+                                  //On l'ajoute dans la bdd
+                                  else {
+                                    db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, value.subject, value.fromto, value.date, value.path_file, value.break, modif_date_folder).finalize();
+                                  }
+                                })
+                              })
                             })
                           }
                         })
