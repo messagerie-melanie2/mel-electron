@@ -26,8 +26,8 @@ function createWindow() {
     }
   });
   // win.maximize();
-  // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
-  win.webContents.loadURL('http://localhost/roundcube');
+  win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
+  // win.webContents.loadURL('http://localhost/roundcube');
 }
 
 app.on("ready", createWindow);
@@ -38,8 +38,7 @@ function indexationArchive() {
   let path_archive = app.getPath("userData") + "/Mails Archive";
   if (fs.existsSync(path_archive)) {
     fs.readdir(path_archive, (err, files) => {
-      new Promise((resolve, reject) => {
-        console.log("debut de lecture des fichiers");
+      new Promise((resolve) => {
         files.forEach((file, index, array) => {
           try {
             let path_file = path_archive + '/' + file;
@@ -60,37 +59,34 @@ function indexationArchive() {
           }
         });
       }).then(() => {
-        console.log("fin de lecture des fichiers");
         Promise.all(promises)
           .then((result) => {
-            console.log("Debut promise All");
             cols = result;
 
-            // Create a table            
-            let modif_date_folder = new Date(fs.statSync(path_archive).mtime).getTime();
-            let date_db = "";
+            // On récupère date du dossier des mails
+            let last_modif_date = Math.max(new Date(fs.statSync(path_archive).mtime).getTime(), new Date(getMostRecentFile(path_archive).mtime).getTime());
+
             db.serialize(function () {
+              // Create a table            
               db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date TEXT, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
 
               db.get("SELECT MAX(modif_date) as modif_date FROM cols", function (err, row) {
                 if (err) throw err;
                 if (row.modif_date === null) {
-                  //si aucune données dans la bdd
+                  console.log("Aucune base de données détecté, insertion des fichiers dans la base");
                   result.forEach((element) => {
-                    db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, element.break, modif_date_folder).finalize();
+                    db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, element.break, last_modif_date).finalize();
                   });
                 } else {
-                  if (modif_date_folder > row.modif_date) {
-                    //besoin de mettre à jour
-                    console.log("debut de lecture des stats des fichiers");
+                  if (last_modif_date > row.modif_date) {
+                    console.log('Base de données non à jour, début du traitement');
                     files.forEach((file, index, array) => {
                       try {
                         let path_file = path_archive + '/' + file;
                         new Promise((resolve) => {
-                          resolve(new Date(fs.statSync(path_file).mtime).getTime());
+                          resolve(new Date(fs.statSync(path_file).ctime).getTime());
                         }).then((date_file) => {
                           if (date_file > row.modif_date) {
-                            //on l'insere dans bdd
                             new Promise((resolve) => {
                               fs.readFile(path_file, 'utf8', (err, eml) => {
                                 if (err) throw err;
@@ -99,16 +95,14 @@ function indexationArchive() {
                             }).then((eml) => {
                               traitementCols(eml, index, path_file).then((value) => {
                                 db.get("SELECT * FROM cols WHERE path_file = ?", value.path_file, function (err, row) {
-                                  if (err) throw err;
-                                  //Si value.path existe dans bdd -> UPDATE
-                                  console.log(row);
+                                  if (err) throw err;                 
                                   if (typeof row != 'undefined') {
-                                    console.log('update');
-                                    db.prepare("UPDATE cols SET subject = ?, fromto = ?, date = ?, break = ?, modif_date = ? WHERE path_file = ?").run(row.subject, row.fromto, row.date, row.break, modif_date_folder, path_file).finalize();
+                                    console.log("Fichier mis à jour : " + path_file);
+                                    db.prepare("UPDATE cols SET subject = ?, fromto = ?, date = ?, break = ?, modif_date = ? WHERE path_file = ?").run(value.subject, value.fromto, value.date, value.break, last_modif_date, path_file).finalize();
                                   }
-                                  //On l'ajoute dans la bdd
                                   else {
-                                    db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, value.subject, value.fromto, value.date, value.path_file, value.break, modif_date_folder).finalize();
+                                    console.log("Fichier inséré dans la base de données : " + path_file);
+                                    db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, value.subject, value.fromto, value.date, value.path_file, value.break, last_modif_date).finalize();
                                   }
                                 })
                               })
@@ -121,12 +115,13 @@ function indexationArchive() {
                       }
                     });
                   }
+                  else {
+                    console.log("Base de données à jour");
+
+                  }
                 }
               });
             });
-
-            console.log("Fin promise All");
-
           }).catch((e) => { console.error(e); })
       });
     });
@@ -136,6 +131,18 @@ function indexationArchive() {
   }
 }
 
+
+const getMostRecentFile = (dir) => {
+  const files = orderReccentFiles(dir);
+  return files.length ? files[0] : undefined;
+};
+
+const orderReccentFiles = (dir) => {
+  return fs.readdirSync(dir)
+    .filter(file => fs.lstatSync(path.join(dir, file)).isFile())
+    .map(file => ({ file, mtime: fs.lstatSync(path.join(dir, file)).mtime }))
+    .sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+};
 
 
 ipcMain.on('attachment_select', (event, uid) => {
