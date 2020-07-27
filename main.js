@@ -39,7 +39,6 @@ app.on("ready", createWindow);
 indexationArchive();
 
 function indexationArchive() {
-
   if (fs.existsSync(path_archive)) {
     if (!functions.isEmpty(path_archive)) {
 
@@ -318,13 +317,13 @@ function constructionMail(result, data, uid) {
   let surplusCc = [];
   let html = data.toString();
 
-  html = html.replace("%%SUBJECT%%", result[0].subject);
-  html = html.replace("%%FROM_NAME%%", result[0].from.value[0].name);
-  html = html.replace("%%FROM%%", result[0].from.value[0].address);
+  html = html.replace("%%SUBJECT%%", result.subject);
+  html = html.replace("%%FROM_NAME%%", result.from.value[0].name);
+  html = html.replace("%%FROM%%", result.from.value[0].address);
 
   let virgule = "";
   to = '<tr><td class="header-title">À</td><td class="header to">';
-  result[0].to.value.forEach(value => {
+  result.to.value.forEach(value => {
     i++;
     if (i <= 5) {
       if (value.name != "") {
@@ -345,11 +344,11 @@ function constructionMail(result, data, uid) {
   to += '</td></tr>';
 
 
-  if (result[0].cc != undefined) {
+  if (result.cc != undefined) {
     i = 0;
     cc = '<tr><td class="header-title">Cc</td><td class="header cc">';
     virgule = "";
-    result[0].cc.value.forEach(value => {
+    result.cc.value.forEach(value => {
       i++;
       if (i <= 5) {
         if (value.name != "") {
@@ -372,16 +371,16 @@ function constructionMail(result, data, uid) {
 
   html = html.replace("%%TOCC%%", to + cc);
 
-  let date = new Date(result[0].date);
+  let date = new Date(result.date);
   let date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
   html = html.replace("%%DATE%%", date_fr);
 
   const regex = /(<style(.*?)*)(\n.*?)*<\/style>/;
-  html = html.replace("%%OBJECT%%", result[0].object.replace(regex, ""));
+  html = html.replace("%%OBJECT%%", result.object.replace(regex, ""));
 
   //Traitement des pièces jointes
-  if (result[0].attachments != []) {
-    result[0].attachments.forEach(element => {
+  if (result.attachments != []) {
+    result.attachments.forEach(element => {
       if (element['contentDisposition'] == "inline") {
         html = html.replace('cid:' + element['cid'], "data:" + element['ctype'] + ";base64, " + element['buf'].toString('base64'));
       }
