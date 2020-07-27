@@ -1,15 +1,19 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron')
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
 let MailParser = require("mailparser").MailParser;
 const shell = require('electron').shell;
 let sqlite3 = require('sqlite3').verbose();
-let db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db')
+let db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
+
+let functions = require(`${__dirname}/src/functions.js`);
 
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
 let cols = [];
-let promises = [];
+let path_archive = app.getPath("userData") + "/Mails Archive";
+
+// let promises = [];
 
 let win;
 
@@ -26,8 +30,8 @@ function createWindow() {
     }
   });
   // win.maximize();
-  win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
-  // win.webContents.loadURL('http://localhost/roundcube');
+  // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
+  win.webContents.loadURL('http://localhost/roundcube');
 }
 
 app.on("ready", createWindow);
@@ -35,103 +39,76 @@ app.on("ready", createWindow);
 indexationArchive();
 
 function indexationArchive() {
-  let path_archive = app.getPath("userData") + "/Mails Archive";
-  // let path_archive = "/home/arnaud/Documents/Mails/Mails2/";
+
   if (fs.existsSync(path_archive)) {
-    fs.readdir(path_archive, (err, files) => {
-      new Promise((resolve) => {
-        files.forEach((file, index, array) => {
-          try {
-            let path_file = path_archive + '/' + file;
-            new Promise((resolve) => {
-              fs.readFile(path_file, 'utf8', (err, eml) => {
-                if (err) console.log(err);
-                resolve(eml);
-              });
-            }).then((eml) => {
-              promises.push(traitementCols(eml, path_file));
-              if (index === array.length - 1) {
-                resolve()
-              };
-            })
-          }
-          catch (err) {
-            console.error(err);
-          }
-        });
-      }).then(() => {
-        Promise.all(promises)
-          .then((result) => {
-            cols = result;
+    if (!functions.isEmpty(path_archive)) {
 
-            // On récupère date du dossier des mails
-            let last_modif_date = Math.max(new Date(fs.statSync(path_archive).mtime).getTime(), new Date(getMostRecentFile(path_archive).mtime).getTime());
+      // On récupère la dernière date à laquelle le dossier à été modifié.
+      let last_modif_date = Math.max(fs.statSync(path_archive).mtime.getTime(), functions.getMostRecentFile(path_archive).mtime.getTime());
 
-            db.serialize(function () {
-              // Create a table            
-              db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date TEXT, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
+      db.serialize(function () {
+        // On créer la bdd si elle n'éxiste pas.
+        db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date TEXT, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
 
-              db.get("SELECT MAX(modif_date) as modif_date FROM cols", function (err, row) {
-                if (err) console.log(err);
-                if (row.modif_date === null) {
-                  console.log("Aucune base de données détecté, insertion des fichiers dans la base");
-                  result.forEach((element) => {
-                    db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, element.break, last_modif_date, function (err) {
-                      if (err) console.log(err.message);
-                    }).finalize();
-                  });
-                } else {
-                  if (last_modif_date > row.modif_date) {
-                    console.log('Base de données non à jour, début du traitement');
-                    files.forEach((file) => {
-                      try {
-                        let path_file = path_archive + '/' + file;
-                        new Promise((resolve) => {
-                          resolve(new Date(fs.statSync(path_file).ctime).getTime());
-                        }).then((date_file) => {
-                          if (date_file > row.modif_date) {
-                            new Promise((resolve) => {
-                              fs.readFile(path_file, 'utf8', (err, eml) => {
-                                if (err) console.log(err);
-                                resolve(eml);
-                              });
-                            }).then((eml) => {
-                              traitementCols(eml, path_file).then((value) => {
-                                db.get("SELECT * FROM cols WHERE path_file = ?", value.path_file, function (err, row) {
-                                  if (err) console.log(err);
-                                  if (typeof row != 'undefined') {
-                                    console.log("Fichier mis à jour : " + path_file);
-                                    db.prepare("UPDATE cols SET subject = ?, fromto = ?, date = ?, break = ?, modif_date = ? WHERE path_file = ?", function (err) {
-                                      if (err) console.log(err);
-                                    }).run(value.subject, value.fromto, value.date, value.break, last_modif_date, path_file).finalize();
-                                  }
-                                  else {
-                                    console.log("Fichier inséré dans la base de données : " + path_file);
-                                    db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)", function (err) {
-                                      if (err) console.log(err);
-                                    }).run(null, value.subject, value.fromto, value.date, value.path_file, value.break, last_modif_date).finalize();
-                                  }
-                                })
-                              })
-                            })
-                          }
-                        })
-                      }
-                      catch (err) {
-                        console.error(err);
-                      }
+        // On récupère la dernière date à laquelle la BDD à été modifiée.
+        db.get("SELECT MAX(modif_date) as modif_date FROM cols", function (err, row) {
+          if (err) console.log(err);
+          if (row.modif_date === null) {
+            console.log("Aucune base de données détecté, insertion des fichiers dans la base");
+            readArchiveDir().then((files) => {
+              traitementColsFiles(files).then((promises) => {
+                Promise.all(promises)
+                  .then((result) => {
+                    result.forEach((element) => {
+                      db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, element.break, last_modif_date, function (err) {
+                        if (err) console.log(err.message);
+                      }).finalize();
                     });
-                  }
-                  else {
-                    console.log("Base de données à jour");
-
-                  }
-                }
+                  });
               });
             });
-          }).catch((e) => { console.error(e); })
+          }
+          else if (last_modif_date > row.modif_date) {
+            console.log('Base de données non à jour, début du traitement');
+            readArchiveDir().then((files) => {
+              checkModifiedFiles(files, row.modif_date).then((promises) => {
+                Promise.all(promises)
+                  .then((modified_files) => {
+                    traitementColsFiles(modified_files).then((promises) => {
+                      Promise.all(promises)
+                        .then((result) => {
+                          result.forEach((value) => {
+                            db.get("SELECT * FROM cols WHERE path_file = ?", value.path_file, function (err, row) {
+                              if (err) console.log(err);
+                              if (typeof row != 'undefined') {
+                                console.log("Fichier mis à jour : " + value.path_file);
+                                db.prepare("UPDATE cols SET subject = ?, fromto = ?, date = ?, break = ?, modif_date = ? WHERE path_file = ?", function (err) {
+                                  if (err) console.log(err);
+                                }).run(value.subject, value.fromto, value.date, value.break, last_modif_date, value.path_file).finalize();
+                              }
+                              else {
+                                console.log("Fichier inséré dans la base de données : " + value.path_file);
+                                db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)", function (err) {
+                                  if (err) console.log(err);
+                                }).run(null, value.subject, value.fromto, value.date, value.path_file, value.break, last_modif_date).finalize();
+                              }
+                            })
+                          })
+                        })
+                    })
+                  })
+              })
+            })
+          }
+          else {
+            console.log('Base de données à jour');
+          }
+        });
       });
-    });
+    }
+    else {
+      console.log('Pas de mails archivés dans le dossier');
+    }
   }
   else {
     fs.mkdirSync(path_archive);
@@ -411,7 +388,7 @@ function constructionMail(result, data, uid) {
       else {
         let filename = element['filename'];
         let ctype = element['ctype'].split('/');
-        let size = " (~" + formatBytes(element['buf'].toString().length, 0) + ")";
+        let size = " (~" + functions.formatBytes(element['buf'].toString().length, 0) + ")";
 
         html = html.replace('style="display: none;"', '');
         html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + ")' id='attachment' title='" + filename + size + "'>" + filename + size + "</a></li>%%ATTACHMENT%%");
@@ -423,29 +400,66 @@ function constructionMail(result, data, uid) {
   return html;
 }
 
-function formatBytes(bytes, decimals = 2) {
-  if (bytes === 0) return '0 Bytes';
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'Ko', 'Mo', 'Go', 'To', 'Po', 'Eo', 'Zo', 'Yo'];
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+function traitementColsFiles(files) {
+  return new Promise((resolve) => {
+    let promises = [];
+    new Promise((resolve, reject) => {
+      files.forEach((file, index, array) => {
+        try {
+          let path_file = path_archive + '/' + file;
+          new Promise((resolve) => {
+            fs.readFile(path_file, 'utf8', (err, eml) => {
+              if (err) console.log(err);
+              resolve(eml);
+            });
+          }).then((eml) => {
+            promises.push(traitementCols(eml, path_file));
+            if (index === array.length - 1) {
+              resolve()
+            };
+          })
+        }
+        catch (err) {
+          console.error(err);
+        }
+      });
+    }).then(() => resolve(promises));
+  })
 }
 
+function readArchiveDir() {
+  return new Promise((resolve, reject) => {
+    fs.readdir(path_archive, (err, files) => {
+      resolve(files);
+    });
+  });
+}
 
-
-
-const getMostRecentFile = (dir) => {
-  const files = orderReccentFiles(dir);
-  return files.length ? files[0] : undefined;
-};
-
-const orderReccentFiles = (dir) => {
-  return fs.readdirSync(dir)
-    .filter(file => fs.lstatSync(path.join(dir, file)).isFile())
-    .map(file => ({ file, mtime: fs.lstatSync(path.join(dir, file)).mtime }))
-    .sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
-};
+function checkModifiedFiles(files, row_modif_date) {
+  return new Promise((resolve) => {
+    let modified_file = [];
+    new Promise((resolve, reject) => {
+      files.forEach((file, index, array) => {
+        try {
+          let path_file = path_archive + '/' + file;
+          new Promise((resolve) => {
+            fs.stat(path_file, (err, stats) => {
+              if (err) console.log(err);
+              resolve(stats.atime.getTime());
+            });
+          }).then((file_time) => {
+            if (file_time > row_modif_date) {
+              modified_file.push(file);
+            }
+            if (index === array.length - 1) {
+              resolve()
+            };
+          })
+        }
+        catch (err) {
+          console.error(err);
+        }
+      });
+    }).then(() => resolve(modified_file));
+  })
+}
