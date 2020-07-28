@@ -29,7 +29,7 @@ function createWindow() {
       preload: path.resolve(`${__dirname}/src/preload.js`),
     }
   });
-  // win.maximize();
+  win.maximize();
   // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
   win.webContents.loadURL('http://localhost/roundcube');
 }
@@ -131,46 +131,58 @@ ipcMain.on('read_mail_dir', (event, msg) => {
 })
 
 ipcMain.on('attachment_select', (event, uid) => {
-  let mail = cols[uid];
-  let eml = fs.readFileSync(mail.path_file, 'utf8');
-
-  let promise = traitementAttachment(eml);
-
-  promise.then((result) => {
-    let path = app.getPath("temp") + '/' + result.filename;
-
-    const options = {
-      type: 'question',
-      buttons: ['Cancel', 'Ouvrir', 'Enregistrer'],
-      title: 'Ouverture de ' + result.filename,
-      message: 'Que doit faire Mél avec ce fichier ?',
-    };
-    win.webContents.send('busy-loader')
-    dialog.showMessageBox(null, options).then(response => {
-      //Si on ouvre
-      if (response.response === 1) {
-        fs.writeFileSync(path, result.buf, (err) => {
-          if (err) throw err;
-        })
-        shell.openPath(path);
-      }
-      //Si on enregistre
-      else if (response.response === 2) {
-        const options = {
-          title: "Enregistrer un fichier",
-          defaultPath: app.getPath('documents') + '/' + result.filename,
+  try {
+    new Promise((resolve, reject) => {
+      db.get("SELECT path_file FROM cols WHERE id = ?", uid, (err, row) => {
+        if (err) {
+          reject(err)
         }
-        dialog.showSaveDialog(null, options).then(response => {
-          fs.writeFileSync(response.filePath, result.buf, (err) => {
-            if (err) throw err;
-          })
-          shell.openPath(response.filePath);
-        });
-      }
-    });
+        else {
+          resolve(row)
+        }
+      });
+    }).then((row) => {
+      let eml = fs.readFileSync(row.path_file, 'utf8');
 
+      traitementAttachment(eml)
+        .then((result) => {
+          let path = app.getPath("temp") + '/' + result.filename;
 
-  })
+          const options = {
+            type: 'question',
+            buttons: ['Cancel', 'Ouvrir', 'Enregistrer'],
+            title: 'Ouverture de ' + result.filename,
+            message: 'Que doit faire Mél avec ce fichier ?',
+          };
+          win.webContents.send('busy-loader')
+          dialog.showMessageBox(null, options).then(response => {
+            //Si on ouvre
+            if (response.response === 1) {
+              fs.writeFileSync(path, result.buf, (err) => {
+                if (err) throw err;
+              })
+              shell.openPath(path);
+            }
+            //Si on enregistre
+            else if (response.response === 2) {
+              const options = {
+                title: "Enregistrer un fichier",
+                defaultPath: app.getPath('documents') + '/' + result.filename,
+              }
+              dialog.showSaveDialog(null, options).then(response => {
+                fs.writeFileSync(response.filePath, result.buf, (err) => {
+                  if (err) throw err;
+                })
+                shell.openPath(response.filePath);
+              });
+            }
+          });
+        })
+    })
+  }
+  catch (err) {
+    console.log(err);
+  }
 })
 
 ipcMain.on('mail_select', (event, uid) => {
@@ -182,7 +194,7 @@ ipcMain.on('mail_select', (event, uid) => {
 
     try {
       new Promise((resolve, reject) => {
-        db.get("SELECT * FROM cols WHERE id = ?", uid, (err, row) => {
+        db.get("SELECT path_file FROM cols WHERE id = ?", uid, (err, row) => {
           if (err) {
             reject(err)
           }
@@ -190,8 +202,8 @@ ipcMain.on('mail_select', (event, uid) => {
             resolve(row)
           }
         });
-      }).then((mail) => {
-        let eml = fs.readFileSync(mail.path_file, 'utf8');
+      }).then((row) => {
+        let eml = fs.readFileSync(row.path_file, 'utf8');
 
         traitementMail(eml).then((mail_content) => {
           let html = constructionMail(mail_content, data, uid);
