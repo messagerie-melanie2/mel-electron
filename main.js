@@ -129,13 +129,13 @@ function arborescenceArchive() {
             let date = value.date.substr(0, 10).split('/');
             let year = date[2];
             let month = date[1];
-
+            let folder_month = year + '-' + month;
             let file_path_year = path_archive + '/' + year;
 
             fs.existsSync(file_path_year) ? "" : fs.mkdirSync(file_path_year);
-            fs.existsSync(file_path_year + '/' + month) ? "" : fs.mkdirSync(file_path_year + '/' + month);
+            fs.existsSync(file_path_year + '/' + folder_month) ? "" : fs.mkdirSync(file_path_year + '/' + folder_month);
 
-            fs.rename(value.path_file, file_path_year + '/' + month + '/' + file_name[file_name.length - 1], (err) => {
+            fs.rename(value.path_file, file_path_year + '/' + folder_month + '/' + file_name[file_name.length - 1], (err) => {
               if (err) throw err;
             });
           })
@@ -454,12 +454,8 @@ function readArchiveDir() {
 function traitementColsFiles(files) {
   return new Promise((resolve) => {
     let promises = [];
-    new Promise((resolve, reject) => {
-      for (let i = 0; i < files.length; i++) {
-        const element = files[i];
-
-      }
-      files.forEach((file, index, array) => {
+    new Promise((resolve) => {
+      files.forEach((file) => {
         try {
           let path_file = path_archive + '/' + file;
           new Promise((resolve) => {
@@ -481,34 +477,6 @@ function traitementColsFiles(files) {
     }).then(() => resolve(promises));
   })
 }
-
-// Retourne un tableau de promise
-function traitementFiles(files) {
-  return new Promise((resolve, reject) => {
-    let promises = [];
-    for (let i = 0; i < files.length; i++) {
-      let path_file = path_archive + '/' + files[i];
-      readEml(path_file).then((eml) => {
-        traitementCols(eml, path_file).then((promise) => {
-          promises.push(promise);
-          if (promises.length == files.length) {
-            resolve();
-          }
-        })
-      })
-    }
-  }).then(() => resolve(promises));
-}
-
-function readEml(path_file) {
-  return new Promise((resolve) => {
-    fs.readFile(path_file, 'utf8', (err, eml) => {
-      if (err) console.log(err);
-      resolve(eml);
-    });
-  });
-}
-
 
 function checkModifiedFiles(files, row_modif_date) {
   return new Promise((resolve) => {
