@@ -10,10 +10,7 @@ let functions = require(`${__dirname}/src/functions.js`);
 
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
-let cols = [];
 let path_archive = app.getPath("userData") + "/Mails Archive";
-
-// let promises = [];
 
 let win;
 
@@ -29,14 +26,15 @@ function createWindow() {
       preload: path.resolve(`${__dirname}/src/preload.js`),
     }
   });
-  win.maximize();
+  // win.maximize();
   // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
   win.webContents.loadURL('http://localhost/roundcube');
 }
 
 app.on("ready", createWindow);
 
-indexationArchive();
+arborescenceArchive();
+// indexationArchive();
 
 function indexationArchive() {
   if (fs.existsSync(path_archive)) {
@@ -113,6 +111,39 @@ function indexationArchive() {
     fs.mkdirSync(path_archive);
   }
 }
+
+function arborescenceArchive() {
+  readArchiveDir().then((files) => {
+    for (let i = 0; i < files.length; i++) {
+      let stats = fs.statSync(path_archive + '/' + files[i]).isFile();
+      if (!stats) {
+        console.log(files[i]);
+        files.splice(i, 1)
+      }
+    }
+    traitementColsFiles(files).then((promises) => {
+      Promise.all(promises)
+        .then((result) => {
+          result.forEach((value) => {
+            let file_name = value.path_file.split('/');
+            let date = value.date.substr(0, 10).split('/');
+            let year = date[2];
+            let month = date[1];
+
+            let file_path_year = path_archive + '/' + year;
+
+            fs.existsSync(file_path_year) ? "" : fs.mkdirSync(file_path_year);
+            fs.existsSync(file_path_year + '/' + month) ? "" : fs.mkdirSync(file_path_year + '/' + month);
+
+            fs.rename(value.path_file, file_path_year + '/' + month + '/' + file_name[file_name.length - 1], (err) => {
+              if (err) throw err;
+            });
+          })
+        });
+    });
+  });
+}
+
 
 ipcMain.on('read_mail_dir', (event, msg) => {
   new Promise((resolve, reject) => {
@@ -411,10 +442,23 @@ function constructionMail(result, data, uid) {
   return html;
 }
 
+
+function readArchiveDir() {
+  return new Promise((resolve, reject) => {
+    fs.readdir(path_archive, (err, files) => {
+      resolve(files);
+    });
+  });
+}
+
 function traitementColsFiles(files) {
   return new Promise((resolve) => {
     let promises = [];
     new Promise((resolve, reject) => {
+      for (let i = 0; i < files.length; i++) {
+        const element = files[i];
+
+      }
       files.forEach((file, index, array) => {
         try {
           let path_file = path_archive + '/' + file;
@@ -425,8 +469,8 @@ function traitementColsFiles(files) {
             });
           }).then((eml) => {
             promises.push(traitementCols(eml, path_file));
-            if (index === array.length - 1) {
-              resolve()
+            if (promises.length == files.length) {
+              resolve();
             };
           })
         }
@@ -438,13 +482,33 @@ function traitementColsFiles(files) {
   })
 }
 
-function readArchiveDir() {
+// Retourne un tableau de promise
+function traitementFiles(files) {
   return new Promise((resolve, reject) => {
-    fs.readdir(path_archive, (err, files) => {
-      resolve(files);
+    let promises = [];
+    for (let i = 0; i < files.length; i++) {
+      let path_file = path_archive + '/' + files[i];
+      readEml(path_file).then((eml) => {
+        traitementCols(eml, path_file).then((promise) => {
+          promises.push(promise);
+          if (promises.length == files.length) {
+            resolve();
+          }
+        })
+      })
+    }
+  }).then(() => resolve(promises));
+}
+
+function readEml(path_file) {
+  return new Promise((resolve) => {
+    fs.readFile(path_file, 'utf8', (err, eml) => {
+      if (err) console.log(err);
+      resolve(eml);
     });
   });
 }
+
 
 function checkModifiedFiles(files, row_modif_date) {
   return new Promise((resolve) => {
