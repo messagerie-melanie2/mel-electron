@@ -54,7 +54,6 @@ function indexationArchive() {
           if (row.modif_date === null) {
             console.log("Aucune base de données détecté, insertion des fichiers dans la base");
             readArchiveSubDir().then((files) => {
-              console.log(files);
               traitementColsFiles(files).then((promises) => {
                 Promise.all(promises)
                   .then((result) => {
@@ -69,7 +68,7 @@ function indexationArchive() {
           }
           else if (last_modif_date > row.modif_date) {
             console.log('Base de données non à jour, début du traitement');
-            readArchiveDir().then((files) => {
+            readArchiveSubDir().then((files) => {
               checkModifiedFiles(files, row.modif_date).then((promises) => {
                 Promise.all(promises)
                   .then((modified_files) => {
@@ -492,9 +491,8 @@ function checkModifiedFiles(files, row_modif_date) {
     new Promise((resolve, reject) => {
       files.forEach((file, index, array) => {
         try {
-          let path_file = path_archive + '/' + file;
           new Promise((resolve) => {
-            fs.stat(path_file, (err, stats) => {
+            fs.stat(file, (err, stats) => {
               if (err) console.log(err);
               resolve(stats.atime.getTime());
             });
