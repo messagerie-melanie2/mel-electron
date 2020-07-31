@@ -1,3 +1,4 @@
+// Déclaration des libraries
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
@@ -5,24 +6,24 @@ let MailParser = require("mailparser").MailParser;
 const shell = require('electron').shell;
 let sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
-
+let glob = require("glob");
 let functions = require(`${__dirname}/src/functions.js`);
 
+//On ignore le certificat de sécurité
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
+//Déclaration des variables
 let path_archive = app.getPath("userData") + "/Mails Archive";
-
 let win;
 
 function createWindow() {
-  // Create the browser window.
   win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: false, // is default value after Electron v5
-      contextIsolation: true, // protect against prototype pollution
-      enableRemoteModule: false, // turn off remote
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
       preload: path.resolve(`${__dirname}/src/preload.js`),
     }
   });
@@ -33,15 +34,15 @@ function createWindow() {
 
 app.on("ready", createWindow);
 
-arborescenceArchive();
-// indexationArchive();
+// arborescenceArchive();
+indexationArchive();
 
 function indexationArchive() {
   if (fs.existsSync(path_archive)) {
     if (!functions.isEmpty(path_archive)) {
 
       // On récupère la dernière date à laquelle le dossier à été modifié.
-      let last_modif_date = Math.max(fs.statSync(path_archive).mtime.getTime(), functions.getMostRecentFile(path_archive).mtime.getTime());
+      let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
 
       db.serialize(function () {
         // On créer la bdd si elle n'éxiste pas.
@@ -52,7 +53,8 @@ function indexationArchive() {
           if (err) console.log(err);
           if (row.modif_date === null) {
             console.log("Aucune base de données détecté, insertion des fichiers dans la base");
-            readArchiveDir().then((files) => {
+            readArchiveSubDir().then((files) => {
+              console.log(files);
               traitementColsFiles(files).then((promises) => {
                 Promise.all(promises)
                   .then((result) => {
@@ -442,10 +444,17 @@ function constructionMail(result, data, uid) {
   return html;
 }
 
-
 function readArchiveDir() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     fs.readdir(path_archive, (err, files) => {
+      resolve(files);
+    });
+  });
+}
+
+function readArchiveSubDir() {
+  return new Promise((resolve) => {
+    glob(path_archive + '/**/*.eml', (err, files) => {
       resolve(files);
     });
   });
@@ -457,14 +466,13 @@ function traitementColsFiles(files) {
     new Promise((resolve) => {
       files.forEach((file) => {
         try {
-          let path_file = path_archive + '/' + file;
           new Promise((resolve) => {
-            fs.readFile(path_file, 'utf8', (err, eml) => {
+            fs.readFile(file, 'utf8', (err, eml) => {
               if (err) console.log(err);
               resolve(eml);
             });
           }).then((eml) => {
-            promises.push(traitementCols(eml, path_file));
+            promises.push(traitementCols(eml, file));
             if (promises.length == files.length) {
               resolve();
             };
