@@ -51,6 +51,17 @@ function indexationArchive() {
     // On créer la bdd si elle n'éxiste pas.
     db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
 
+    //On supprime les mails qui n'existe plus dans la bdd 
+    readDir(path_archive + '/**/*.eml').then((files) => {
+      db.all(functions.inParam(('SELECT * FROM cols WHERE path_file NOT IN (?#)'), files), files, function (err, rows) {
+        rows.forEach((row) => {
+          console.log("Suppression de " + row.path_file + " dans la base de données");
+          db.prepare("DELETE FROM cols WHERE id = ?").run(row.id, function (err) {
+            if (err) console.log(err.message);
+          }).finalize();
+        })
+      })
+    });
     // On récupère la dernière date à laquelle la BDD à été modifiée.
     db.get("SELECT MAX(modif_date) as modif_date FROM cols", function (err, row) {
       if (err) console.log(err);

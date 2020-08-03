@@ -25,6 +25,10 @@ module.exports = {
         return fs.readdirSync(path).length === 0;
     },
 
+    inParam(sql, arr) {
+        return sql.replace('?#', arr.map(() => '?').join(','))
+    },
+    
     formatBytes(bytes, decimals = 2) {
         if (bytes === 0) return '0 Bytes';
 
