@@ -37,7 +37,11 @@ function createWindow() {
 app.on("ready", createWindow);
 
 
-zipDecompress().then((files) => arborescenceArchive().then((value) => indexationArchive()).catch((err) => console.log(err))).catch((error) => console.log(error));
+zipDecompress().catch((err) => console.log(err)).finally(function () {
+  arborescenceArchive().catch((err) => console.log(err)).finally(function () {
+    indexationArchive();
+  })
+})
 
 function indexationArchive() {
   // On récupère la dernière date à laquelle le dossier à été modifié.
@@ -132,7 +136,6 @@ function arborescenceArchive() {
     if (fs.existsSync(path_archive)) {
       if (!functions.isEmpty(path_archive)) {
         readDir(path_archive + '/*').then((files) => {
-          console.log(files);
           for (let i = 0; i < files.length; i++) {
             let stats = fs.statSync(files[i]).isFile();
             if (!stats) {
@@ -159,7 +162,7 @@ function arborescenceArchive() {
                     fs.existsSync(file_path_year) ? "" : fs.mkdirSync(file_path_year);
                     fs.existsSync(file_path_year + '/' + folder_month) ? "" : fs.mkdirSync(file_path_year + '/' + folder_month);
 
-                    fs.rename(value.path_file, file_path_year + '/' + folder_month + '/' + file_name[file_name.length - 1], (err) => {
+                    fs.renameSync(value.path_file, file_path_year + '/' + folder_month + '/' + file_name[file_name.length - 1], (err) => {
                       if (err) throw err;
                     });
 
