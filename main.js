@@ -34,7 +34,7 @@ function createWindow() {
 
 app.on("ready", createWindow);
 
-// arborescenceArchive();
+arborescenceArchive();
 indexationArchive();
 
 function indexationArchive() {
@@ -53,7 +53,7 @@ function indexationArchive() {
           if (err) console.log(err);
           if (row.modif_date === null) {
             console.log("Aucune base de données détecté, insertion des fichiers dans la base");
-            readArchiveSubDir().then((files) => {
+            readDir(path_archive + '/**/*.eml').then((files) => {
               traitementColsFiles(files).then((promises) => {
                 Promise.all(promises)
                   .then((result) => {
@@ -68,7 +68,7 @@ function indexationArchive() {
           }
           else if (last_modif_date > row.modif_date) {
             console.log('Base de données non à jour, début du traitement');
-            readArchiveSubDir().then((files) => {
+            readDir(path_archive + '/**/*.eml').then((files) => {
               checkModifiedFiles(files, row.modif_date).then((promises) => {
                 Promise.all(promises)
                   .then((modified_files) => {
@@ -114,9 +114,9 @@ function indexationArchive() {
 }
 
 function arborescenceArchive() {
-  readArchiveDir().then((files) => {
+  readDir(path_archive + '/*').then((files) => {
     for (let i = 0; i < files.length; i++) {
-      let stats = fs.statSync(path_archive + '/' + files[i]).isFile();
+      let stats = fs.statSync(files[i]).isFile();
       if (!stats) {
         console.log(files[i]);
         files.splice(i, 1)
@@ -443,17 +443,9 @@ function constructionMail(result, data, uid) {
   return html;
 }
 
-function readArchiveDir() {
+function readDir(path) {
   return new Promise((resolve) => {
-    fs.readdir(path_archive, (err, files) => {
-      resolve(files);
-    });
-  });
-}
-
-function readArchiveSubDir() {
-  return new Promise((resolve) => {
-    glob(path_archive + '/**/*.eml', (err, files) => {
+    glob(path, (err, files) => {
       resolve(files);
     });
   });
