@@ -8,6 +8,8 @@ let sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
 let glob = require("glob");
 let functions = require(`${__dirname}/src/functions.js`);
+const decompress = require('decompress');
+const decompressUnzip = require('decompress-unzip');
 
 //On ignore le certificat de sécurité
 app.commandLine.appendSwitch('ignore-certificate-errors');
@@ -34,7 +36,8 @@ function createWindow() {
 
 app.on("ready", createWindow);
 
-arborescenceArchive().then((value) => indexationArchive()).catch((err) => console.log(err));
+
+zipDecompress().then((files) => arborescenceArchive().then((value) => indexationArchive()).catch((err) => console.log(err))).catch((error) => console.log(error));
 
 function indexationArchive() {
   // On récupère la dernière date à laquelle le dossier à été modifié.
@@ -101,12 +104,35 @@ function indexationArchive() {
   });
 }
 
+function zipDecompress() {
+  return new Promise((resolve, reject) => {
+    readDir(path_archive + '/*.zip').then((files) => {
+      if (files.length) {
+        for (let i = 0; i < files.length; i++) {
+          decompress(files[i], path_archive, {
+            plugins: [
+              decompressUnzip()
+            ]
+          }).then(() => {
+            console.log('Files decompressed');
+            fs.unlinkSync(files[i])
+            resolve();
+          });
+        }
+      }
+      else {
+        reject('Pas de zip');
+      }
+    });
+  });
+}
+
 function arborescenceArchive() {
   return new Promise((resolve, reject) => {
     if (fs.existsSync(path_archive)) {
       if (!functions.isEmpty(path_archive)) {
-
         readDir(path_archive + '/*').then((files) => {
+          console.log(files);
           for (let i = 0; i < files.length; i++) {
             let stats = fs.statSync(files[i]).isFile();
             if (!stats) {
