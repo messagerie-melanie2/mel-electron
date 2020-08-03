@@ -28,6 +28,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "postinstall": "electron-builder install-app-deps",
     "dist": "electron-builder"
   },
   "author": "AGoubs <arnaud.goubier@i-carre.net>",
@@ -38,7 +39,13 @@
   },
   "dependencies": {
     "app": "^0.1.0",
+    "decompress": "^4.2.1",
+    "decompress-unzip": "^4.0.1",
+    "electron-db": "^1.0.0",
+    "glob": "^7.1.6",
     "jquery": "^3.5.0",
-    "mailparser": "^2.7.7"
+    "mailparser": "^2.7.7",
+    "sqlite3": "^5.0.0",
+    "underscore": "^1.10.2"
   }
 }

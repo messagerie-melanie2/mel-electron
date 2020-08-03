@@ -10,18 +10,18 @@ contextBridge.exposeInMainWorld(
     "api", {
     send: (channel, data) => {
         // whitelist channels
-            let validChannels = ["read_mail_dir","mail_select","attachment_select"];
+        let validChannels = ["read_mail_dir", "mail_select", "attachment_select"];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
         }
     },
     receive: (channel, func) => {
-        let validChannels = ["mail_dir", "mail_return","busy-loader"];
+        let validChannels = ["mail_dir", "mail_return", "busy-loader"];
         if (validChannels.includes(channel)) {
             // Deliberately strip event as it includes `sender` 
-            
+
             ipcRenderer.on(channel, (event, ...args) => func(...args));
-            
+
         }
     }
 }
