@@ -46,7 +46,7 @@ function indexationArchive() {
 
       db.serialize(function () {
         // On créer la bdd si elle n'éxiste pas.
-        db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date TEXT, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
+        db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
 
         // On récupère la dernière date à laquelle la BDD à été modifiée.
         db.get("SELECT MAX(modif_date) as modif_date FROM cols", function (err, row) {
@@ -118,7 +118,6 @@ function arborescenceArchive() {
     for (let i = 0; i < files.length; i++) {
       let stats = fs.statSync(files[i]).isFile();
       if (!stats) {
-        console.log(files[i]);
         files.splice(i, 1)
       }
     }
@@ -148,7 +147,7 @@ function arborescenceArchive() {
 
 ipcMain.on('read_mail_dir', (event, msg) => {
   new Promise((resolve, reject) => {
-    db.all("SELECT * FROM cols WHERE break != 1", (err, rows) => {
+    db.all("SELECT * FROM cols WHERE break != 1 ORDER BY date DESC", (err, rows) => {
       if (err) {
         reject(err)
       }
@@ -259,8 +258,9 @@ function traitementCols(eml, path_file) {
     mailparser.on("headers", function (headers) {
       subject = headers.get('subject');
       from = headers.get('from');
-      let date = new Date(headers.get('date'));
-      date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
+      let date_fr = new Date(headers.get('date').getTime());
+      // date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' });
+      // date_fr = date_fr.getTime();
       try {
         resolve({ "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0 });
       }
