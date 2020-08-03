@@ -16,7 +16,7 @@ app.commandLine.appendSwitch('ignore-certificate-errors');
 
 //Déclaration des variables
 let path_archive = app.getPath("userData") + "/Mails Archive";
-let win;
+let win
 
 function createWindow() {
   win = new BrowserWindow({
