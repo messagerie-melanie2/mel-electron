@@ -1,23 +1,24 @@
-// Déclaration des libraries
+// ----- Déclaration des libraries -----
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
-let MailParser = require("mailparser").MailParser;
+const MailParser = require("mailparser").MailParser;
 const shell = require('electron').shell;
-let sqlite3 = require('sqlite3').verbose();
-let db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
-let glob = require("glob");
-let functions = require(`${__dirname}/src/functions.js`);
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
+const glob = require("glob");
+const functions = require(`${__dirname}/src/functions.js`);
 const decompress = require('decompress');
 const decompressUnzip = require('decompress-unzip');
 
-//On ignore le certificat de sécurité
+// ----- On ignore le certificat de sécurité -----
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
-//Déclaration des variables
+// ----- Déclaration des variables -----
 let path_archive = app.getPath("userData") + "/Mails Archive";
-let win
+let win;
 
+// ----- Création de la fenêtre pour electron -----
 function createWindow() {
   win = new BrowserWindow({
     width: 800,
@@ -36,19 +37,20 @@ function createWindow() {
 
 app.on("ready", createWindow);
 
-
+// ----- Lancement des fonctions dans electron -----
 zipDecompress().catch((err) => console.log(err)).finally(function () {
   arborescenceArchive().catch((err) => console.log(err)).finally(function () {
     indexationArchive();
   })
 })
 
+// ----- Déclaration des fonctions -----
 function indexationArchive() {
   // On récupère la dernière date à laquelle le dossier à été modifié.
   let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
 
   db.serialize(function () {
-    // On créer la bdd si elle n'éxiste pas.
+    // On créer la bdd si elle n'existe pas.
     db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
 
     //On supprime les mails qui n'existe plus dans la bdd 
@@ -62,6 +64,7 @@ function indexationArchive() {
         })
       })
     });
+    
     // On récupère la dernière date à laquelle la BDD à été modifiée.
     db.get("SELECT MAX(modif_date) as modif_date FROM cols", function (err, row) {
       if (err) console.log(err);
@@ -99,7 +102,7 @@ function indexationArchive() {
                             }).run(value.subject, value.fromto, value.date, value.break, last_modif_date, value.path_file).finalize();
                           }
                           else {
-                            console.log("Fichier inséré dans la base de données : " + value.path_file);
+                            console.log("Fichier inséré : " + value.path_file);
                             db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)", function (err) {
                               if (err) console.log(err);
                             }).run(null, value.subject, value.fromto, value.date, value.path_file, value.break, last_modif_date).finalize();
