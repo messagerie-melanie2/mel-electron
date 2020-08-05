@@ -10,6 +10,7 @@ const glob = require("glob");
 const functions = require(`${__dirname}/src/functions.js`);
 const decompress = require('decompress');
 const decompressUnzip = require('decompress-unzip');
+const chokidar = require('chokidar');
 
 // ----- On ignore le certificat de sécurité -----
 app.commandLine.appendSwitch('ignore-certificate-errors');
@@ -17,6 +18,11 @@ app.commandLine.appendSwitch('ignore-certificate-errors');
 // ----- Déclaration des variables -----
 let path_archive = app.getPath("userData") + "/Mails Archive";
 let win;
+const watcher = chokidar.watch(path_archive, {
+  persistent: true,
+  ignored: /.eml/,
+  ignoreInitial: true,
+});
 
 // ----- Création de la fenêtre pour electron -----
 function createWindow() {
@@ -38,13 +44,23 @@ function createWindow() {
 app.on("ready", createWindow);
 
 // ----- Lancement des fonctions dans electron -----
-zipDecompress().catch((err) => console.log(err)).finally(function () {
-  arborescenceArchive().catch((err) => console.log(err)).finally(function () {
-    indexationArchive();
-  })
+launch();
+
+watcher.on('add', path => {
+  console.log(`File ${path} has been added`)
+  setTimeout(function(){  launch(); }, 1000); 
 })
 
 // ----- Déclaration des fonctions -----
+function launch() {
+  zipDecompress().catch((err) => console.log(err)).finally(function () {
+    arborescenceArchive().catch((err) => console.log(err)).finally(function () {
+      indexationArchive();
+    })
+  })
+}
+
+
 function indexationArchive() {
   // On récupère la dernière date à laquelle le dossier à été modifié.
   let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
@@ -57,14 +73,14 @@ function indexationArchive() {
     readDir(path_archive + '/**/*.eml').then((files) => {
       db.all(functions.inParam(('SELECT * FROM cols WHERE path_file NOT IN (?#)'), files), files, function (err, rows) {
         rows.forEach((row) => {
-          console.log("Suppression de " + row.path_file + " dans la base de données");
+          console.log("Suppression dans la base de données : " + row.path_file);
           db.prepare("DELETE FROM cols WHERE id = ?").run(row.id, function (err) {
             if (err) console.log(err.message);
           }).finalize();
         })
       })
     });
-    
+
     // On récupère la dernière date à laquelle la BDD à été modifiée.
     db.get("SELECT MAX(modif_date) as modif_date FROM cols", function (err, row) {
       if (err) console.log(err);

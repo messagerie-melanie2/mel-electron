@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "app": "^0.1.0",
+    "chokidar": "^3.4.1",
     "decompress": "^4.2.1",
     "decompress-unzip": "^4.0.1",
     "electron-db": "^1.0.0",
