@@ -36,7 +36,7 @@ function createWindow() {
       preload: path.resolve(`${__dirname}/src/preload.js`),
     }
   });
-  win.maximize();
+  // win.maximize();
   // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
   win.webContents.loadURL('http://localhost/roundcube');
 }
@@ -48,7 +48,7 @@ launch();
 
 watcher.on('add', path => {
   console.log(`File ${path} has been added`)
-  setTimeout(function(){  launch(); }, 1000); 
+  setTimeout(function () { launch(); }, 1000);
 })
 
 // ----- Déclaration des fonctions -----
@@ -64,6 +64,8 @@ function launch() {
 function indexationArchive() {
   // On récupère la dernière date à laquelle le dossier à été modifié.
   let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
+  let nb_files = 0;
+  let nb_rows = 0;
 
   db.serialize(function () {
     // On créer la bdd si elle n'existe pas.
@@ -132,7 +134,26 @@ function indexationArchive() {
         })
       }
       else {
-        console.log('Base de données à jour');
+        readDir(path_archive + '/**/*.eml').then((files) => {
+          db.get("SELECT COUNT(*) as nb_rows FROM cols", function (err, row) {
+            if (files.length === row.nb_rows) {
+              console.log("Base de données à jour");
+            }
+            else {
+              console.log("Base de données incomplète, insertion des fichiers restant");
+              traitementColsFiles(files).then((promises) => {
+                Promise.all(promises)
+                  .then((result) => {
+                    result.forEach((element) => {
+                      db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, element.break, last_modif_date, function (err) {
+                        if (err) console.log(err.message);
+                      }).finalize();
+                    });
+                  });
+              });
+            }
+          });
+        });
       }
     });
   });
