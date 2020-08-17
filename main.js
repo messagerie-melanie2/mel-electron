@@ -36,7 +36,7 @@ function createWindow() {
       preload: path.resolve(`${__dirname}/src/preload.js`),
     }
   });
-  // win.maximize();
+  win.maximize();
   // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
   win.webContents.loadURL('http://localhost/roundcube');
 }
@@ -498,7 +498,7 @@ function constructionMail(result, data, uid) {
   //Traitement des pièces jointes
   if (result.attachments != []) {
     result.attachments.forEach(element => {
-      if (element['contentDisposition'] == "inline") {
+      if (element['contentDisposition'] != "attachment") {
         html = html.replace('cid:' + element['cid'], "data:" + element['ctype'] + ";base64, " + element['buf'].toString('base64'));
       }
       else {
