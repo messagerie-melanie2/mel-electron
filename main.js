@@ -93,8 +93,7 @@ function indexationArchive() {
             Promise.all(promises)
               .then((result) => {
                 result.forEach((element) => {
-                  let subfolder = getSubfolder(element.path_file);
-                  db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date) VALUES(?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, subfolder, element.break, last_modif_date, function (err) {
+                  db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date) VALUES(?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, getSubfolder(element.path_file), element.break, last_modif_date, function (err) {
                     if (err) console.log(err.message);
                   }).finalize();
                 });
@@ -122,9 +121,9 @@ function indexationArchive() {
                           }
                           else {
                             console.log("Fichier inséré : " + value.path_file);
-                            db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)", function (err) {
+                            db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date) VALUES(?,?,?,?,?,?,?,?)", function (err) {
                               if (err) console.log(err);
-                            }).run(null, value.subject, value.fromto, value.date, value.path_file, value.break, last_modif_date).finalize();
+                            }).run(null, value.subject, value.fromto, value.date, value.path_file, getSubfolder(value.path_file), value.break, last_modif_date).finalize();
                           }
                         })
                       })
@@ -146,7 +145,7 @@ function indexationArchive() {
                 Promise.all(promises)
                   .then((result) => {
                     result.forEach((element) => {
-                      db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, element.break, last_modif_date, function (err) {
+                      db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date) VALUES(?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, getSubfolder(element.path_file), element.break, last_modif_date, function (err) {
                         if (err) console.log(err.message);
                       }).finalize();
                     });
@@ -543,7 +542,7 @@ function getSubfolder(path) {
   let subfolder = path.pop();
   subfolder = subfolder.split('/');
   subfolder.pop();
-  return subfolder.join('/'); 
+  return subfolder.join('/');
 }
 
 function readDir(path) {
