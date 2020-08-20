@@ -69,7 +69,7 @@ function indexationArchive() {
 
   db.serialize(function () {
     // On créer la bdd si elle n'existe pas.
-    db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, break TEXT, modif_date INTEGER)');
+    db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, subfolder TEXT, break TEXT, modif_date INTEGER)');
 
     //On supprime les mails qui n'existe plus dans la bdd 
     readDir(path_archive + '/**/*.eml').then((files) => {
@@ -93,7 +93,8 @@ function indexationArchive() {
             Promise.all(promises)
               .then((result) => {
                 result.forEach((element) => {
-                  db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, break, modif_date) VALUES(?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, element.break, last_modif_date, function (err) {
+                  let subfolder = getSubfolder(element.path_file);
+                  db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date) VALUES(?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, subfolder, element.break, last_modif_date, function (err) {
                     if (err) console.log(err.message);
                   }).finalize();
                 });
@@ -535,6 +536,14 @@ function constructionMail(result, data, uid) {
 
   html = html.replace('%%ATTACHMENT%%', '');
   return html;
+}
+
+function getSubfolder(path) {
+  path = path.split('Mails Archive/');
+  let subfolder = path.pop();
+  subfolder = subfolder.split('/');
+  subfolder.pop();
+  return subfolder.join('/'); 
 }
 
 function readDir(path) {
