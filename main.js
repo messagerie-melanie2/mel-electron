@@ -12,7 +12,8 @@ const decompress = require('decompress');
 const decompressUnzip = require('decompress-unzip');
 const chokidar = require('chokidar');
 const simpleParser = require('mailparser').simpleParser;
-const dwalk = require('kc-dwalk');
+const dree = require('dree');
+
 
 // ----- On ignore le certificat de sécurité -----
 app.commandLine.appendSwitch('ignore-certificate-errors');
@@ -242,15 +243,11 @@ function arborescenceArchive() {
 }
 
 ipcMain.on('subfolder', (event, msg) => {
-  let listDirectories = [];
-  var list = dwalk(path_archive);
-  console.log(list);
-  list.forEach((path) => {
-    path = path.split('Mails Archive/');
-    let subfolder = path.pop();
-    listDirectories.push(subfolder);
-  })
-  win.webContents.send('listSubfolder', listDirectories)
+  const options = {
+    extensions: []
+  }
+  const tree = dree.scan(path_archive, options);
+  win.webContents.send('listSubfolder', tree.children)
 });
 
 ipcMain.on('read_mail_dir', (event, msg) => {

@@ -42,6 +42,7 @@
     "chokidar": "^3.4.1",
     "decompress": "^4.2.1",
     "decompress-unzip": "^4.0.1",
+    "dree": "^2.4.15",
     "electron-db": "^1.0.0",
     "glob": "^7.1.6",
     "jquery": "^3.5.0",
