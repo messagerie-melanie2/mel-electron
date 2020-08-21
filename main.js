@@ -11,7 +11,7 @@ const functions = require(`${__dirname}/src/functions.js`);
 const decompress = require('decompress');
 const decompressUnzip = require('decompress-unzip');
 const chokidar = require('chokidar');
-
+const simpleParser = require('mailparser').simpleParser;
 // ----- On ignore le certificat de sécurité -----
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
@@ -36,7 +36,7 @@ function createWindow() {
       preload: path.resolve(`${__dirname}/src/preload.js`),
     }
   });
-  // win.maximize();
+  win.maximize();
   // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
   win.webContents.loadURL('http://localhost/roundcube');
 }
@@ -255,10 +255,10 @@ ipcMain.on('read_mail_dir', (event, msg) => {
 
 })
 
-ipcMain.on('attachment_select', (event, uid) => {
+ipcMain.on('attachment_select', (event, value) => {
   try {
     new Promise((resolve, reject) => {
-      db.get("SELECT path_file FROM cols WHERE id = ?", uid, (err, row) => {
+      db.get("SELECT path_file FROM cols WHERE id = ?", value.uid, (err, row) => {
         if (err) {
           reject(err)
         }
@@ -269,7 +269,7 @@ ipcMain.on('attachment_select', (event, uid) => {
     }).then((row) => {
       let eml = fs.readFileSync(row.path_file, 'utf8');
 
-      traitementAttachment(eml)
+      traitementAttachment(eml, value.partid)
         .then((result) => {
           let path = app.getPath("temp") + '/' + result.filename;
 
@@ -283,7 +283,7 @@ ipcMain.on('attachment_select', (event, uid) => {
           dialog.showMessageBox(null, options).then(response => {
             //Si on ouvre
             if (response.response === 1) {
-              fs.writeFileSync(path, result.buf, (err) => {
+              fs.writeFileSync(path, result.content, (err) => {
                 if (err) throw err;
               })
               shell.openPath(path);
@@ -295,7 +295,7 @@ ipcMain.on('attachment_select', (event, uid) => {
                 defaultPath: app.getPath('documents') + '/' + result.filename,
               }
               dialog.showSaveDialog(null, options).then(response => {
-                fs.writeFileSync(response.filePath, result.buf, (err) => {
+                fs.writeFileSync(response.filePath, result.content, (err) => {
                   if (err) throw err;
                 })
                 shell.openPath(response.filePath);
@@ -390,6 +390,7 @@ function traitementMail(eml) {
         attachment_content['cid'] = mail_object.cid;
         attachment_content['ctype'] = mail_object.contentType;
         attachment_content['filename'] = mail_object.filename;
+        attachment_content['partid'] = mail_object.partId;
 
 
         mail_object.content.on('data', function (d) {
@@ -414,35 +415,19 @@ function traitementMail(eml) {
   })
 }
 
+
 //Parsage du mail pour récupérer les pièces jointes
-function traitementAttachment(eml) {
+function traitementAttachment(eml, partid) {
   return new Promise((resolve) => {
-    var mailparser = new MailParser();
-    let attachment_content = {};
-    mailparser.on("data", function (mail_object) {
-      if (mail_object.type === 'attachment') {
-        let bufs = [];
-
-        attachment_content.contentDisposition = mail_object.contentDisposition;
-
-        attachment_content.cid = mail_object.cid;
-        attachment_content.ctype = mail_object.contentType;
-        attachment_content.filename = mail_object.filename;
-
-        mail_object.content.on('data', function (d) {
-          bufs.push(d);
-        });
-        mail_object.content.on('end', function () {
-          attachment_content.buf = Buffer.concat(bufs);
-          mail_object.release()
-        });
-      }
-      if (mail_object.type === 'text') {
-        resolve(attachment_content);
+    simpleParser(eml, (err, parsed) => {
+      if (parsed.attachments) {
+        parsed.attachments.forEach((attachment) => {
+          if (attachment.partId == partid) {
+            resolve(attachment);
+          }
+        })
       }
     });
-    mailparser.write(eml);
-    mailparser.end();
   })
 }
 
@@ -528,7 +513,7 @@ function constructionMail(result, data, uid) {
         let size = " (~" + functions.formatBytes(element['buf'].toString().length, 0) + ")";
 
         html = html.replace('style="display: none;"', '');
-        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + ")' id='attachment' title='" + filename + size + "'>" + filename + size + "</a></li>%%ATTACHMENT%%");
+        html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + "," + element["partid"] + ")' id='attachment' title='" + filename + size + "'>" + filename + size + "</a></li>%%ATTACHMENT%%");
       }
     })
   }
