@@ -45,6 +45,7 @@
     "electron-db": "^1.0.0",
     "glob": "^7.1.6",
     "jquery": "^3.5.0",
+    "kc-dwalk": "^1.0.9",
     "mailparser": "^2.7.7",
     "sqlite3": "^5.0.0",
     "underscore": "^1.10.2"

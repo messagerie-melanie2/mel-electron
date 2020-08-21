@@ -4,13 +4,16 @@ const glob = require("glob");
 _ = require('underscore');
 
 module.exports = {
-
     getLastModifiedFolder(path) {
         let stats = [];
         getDirectoriesRecursive(path).forEach((folder) => {
             stats.push(fs.statSync(path).mtime.getTime());
         })
         return _.max(stats);
+    },
+
+    getListDirectories(path) {
+        return getDirectoriesRecursive(path);
     },
 
     getLastModifiedFile(path) {

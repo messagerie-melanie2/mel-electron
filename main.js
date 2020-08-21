@@ -12,11 +12,14 @@ const decompress = require('decompress');
 const decompressUnzip = require('decompress-unzip');
 const chokidar = require('chokidar');
 const simpleParser = require('mailparser').simpleParser;
+const dwalk = require('kc-dwalk');
+
 // ----- On ignore le certificat de sécurité -----
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
 // ----- Déclaration des variables -----
-let path_archive = app.getPath("userData") + "/Mails Archive";
+let path_separator = path.sep;
+let path_archive = app.getPath("userData") + path_separator + "Mails Archive";
 let win;
 const watcher = chokidar.watch(path_archive, {
   persistent: true,
@@ -36,7 +39,7 @@ function createWindow() {
       preload: path.resolve(`${__dirname}/src/preload.js`),
     }
   });
-  win.maximize();
+  // win.maximize();
   // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
   win.webContents.loadURL('http://localhost/roundcube');
 }
@@ -54,9 +57,9 @@ watcher.on('add', path => {
 // ----- Déclaration des fonctions -----
 function launch() {
   zipDecompress().catch((err) => console.log(err)).finally(function () {
-    arborescenceArchive().catch((err) => console.log(err)).finally(function () {
-      indexationArchive();
-    })
+    // arborescenceArchive().catch((err) => console.log(err)).finally(function () {
+    indexationArchive();
+    // })
   })
 }
 
@@ -238,6 +241,17 @@ function arborescenceArchive() {
   });
 }
 
+ipcMain.on('subfolder', (event, msg) => {
+  let listDirectories = [];
+  var list = dwalk(path_archive);
+  console.log(list);
+  list.forEach((path) => {
+    path = path.split('Mails Archive/');
+    let subfolder = path.pop();
+    listDirectories.push(subfolder);
+  })
+  win.webContents.send('listSubfolder', listDirectories)
+});
 
 ipcMain.on('read_mail_dir', (event, msg) => {
   new Promise((resolve, reject) => {
@@ -252,7 +266,6 @@ ipcMain.on('read_mail_dir', (event, msg) => {
   }).then((value) => {
     win.webContents.send('mail_dir', value)
   })
-
 })
 
 ipcMain.on('attachment_select', (event, value) => {
