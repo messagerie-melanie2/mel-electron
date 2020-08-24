@@ -199,7 +199,9 @@ ipcMain.on('attachment_select', (event, value) => {
 
 ipcMain.on('mail_select', (event, uid) => {
   if (uid != null) {
-    fs.readFile('template/messagepreview.html', (err, data) => {
+    const dataPath = path.join(process.resourcesPath, 'template/messagepreview.html');
+
+    fs.readFile(dataPath, (err, data) => {
       if (err) {
         console.error(err)
         return

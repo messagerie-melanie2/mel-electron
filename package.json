@@ -1,8 +1,14 @@
 {
   "build": {
     "appId": "com.electron.mel",
+    "extraResources": [
+      {
+        "from": "template/messagepreview.html",
+        "to": "template/messagepreview.html"
+      }
+    ],
     "win": {
-      "icon": "icones/mel.ico",
+      "icon": "icons/mel.ico",
       "target": [
         "nsis"
       ]
