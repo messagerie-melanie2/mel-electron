@@ -50,7 +50,7 @@ function indexationArchive() {
 
   db.serialize(function () {
     // On créer la bdd si elle n'existe pas.
-    db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, subfolder TEXT, break TEXT, modif_date INTEGER)');
+    db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, subfolder TEXT, break TEXT, content_type TEXT, modif_date INTEGER)');
 
     //On supprime les mails qui n'existe plus dans la bdd 
     readDir(path_archive + '/**/*.eml').then((files) => {
@@ -74,7 +74,7 @@ function indexationArchive() {
             Promise.all(promises)
               .then((result) => {
                 result.forEach((element) => {
-                  db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date) VALUES(?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, getSubfolder(element.path_file), element.break, last_modif_date, function (err) {
+                  db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date, content_type) VALUES(?,?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, getSubfolder(element.path_file), element.break, last_modif_date, element.content_type, function (err) {
                     if (err) console.log(err.message);
                   }).finalize();
                 });
@@ -102,9 +102,9 @@ function indexationArchive() {
                           }
                           else {
                             console.log("Fichier inséré : " + value.path_file);
-                            db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date) VALUES(?,?,?,?,?,?,?,?)", function (err) {
+                            db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date, content_type) VALUES(?,?,?,?,?,?,?,?,?)", function (err) {
                               if (err) console.log(err);
-                            }).run(null, value.subject, value.fromto, value.date, value.path_file, getSubfolder(value.path_file), value.break, last_modif_date).finalize();
+                            }).run(null, value.subject, value.fromto, value.date, value.path_file, getSubfolder(value.path_file), value.break, last_modif_date, value.content_type).finalize();
                           }
                         })
                       })
@@ -257,19 +257,18 @@ function traitementCols(eml, path_file) {
   return new Promise((resolve) => {
     let subject = "";
     let from = "";
-    let date_fr = "";
+    let content_type = "";
     let mailparser = new MailParser();
     mailparser.on("headers", function (headers) {
       subject = headers.get('subject');
       from = headers.get('from');
+      content_type = headers.get('content-type').value;
       let date_fr = new Date(headers.get('date').getTime());
-      // date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' });
-      // date_fr = date_fr.getTime();
       try {
-        resolve({ "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0 });
+        resolve({ "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0, "content_type": content_type});
       }
       catch (error) {
-        resolve({ "subject": "", "fromto": "", "date": "", "path_file": "", "break": 1 });
+        resolve({ "subject": "", "fromto": "", "date": "", "path_file": "", "break": 1, "content_type": ""});
       };
     });
     mailparser.write(eml);
