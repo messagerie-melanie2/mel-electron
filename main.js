@@ -179,36 +179,15 @@ ipcMain.on('attachment_select', (event, value) => {
 
       traitementAttachment(eml, value.partid)
         .then((result) => {
-          let path = app.getPath("temp") + '/' + result.filename;
-
           const options = {
-            type: 'question',
-            buttons: ['Cancel', 'Ouvrir', 'Enregistrer'],
-            title: 'Ouverture de ' + result.filename,
-            message: 'Que doit faire Mél avec ce fichier ?',
-          };
-          win.webContents.send('busy-loader')
-          dialog.showMessageBox(null, options).then(response => {
-            //Si on ouvre
-            if (response.response === 1) {
-              fs.writeFileSync(path, result.content, (err) => {
-                if (err) throw err;
-              })
-              shell.openPath(path);
-            }
-            //Si on enregistre
-            else if (response.response === 2) {
-              const options = {
-                title: "Enregistrer un fichier",
-                defaultPath: app.getPath('documents') + '/' + result.filename,
-              }
-              dialog.showSaveDialog(null, options).then(response => {
-                fs.writeFileSync(response.filePath, result.content, (err) => {
-                  if (err) throw err;
-                })
-                shell.openPath(response.filePath);
-              });
-            }
+            title: "Enregistrer un fichier",
+            defaultPath: app.getPath('downloads') + '/' + result.filename,
+          }
+          dialog.showSaveDialog(null, options).then(response => {
+            fs.writeFileSync(response.filePath, result.content, (err) => {
+              if (err) throw err;
+            })
+            shell.openPath(response.filePath);
           });
         })
     })
@@ -265,10 +244,10 @@ function traitementCols(eml, path_file) {
       content_type = headers.get('content-type').value;
       let date_fr = new Date(headers.get('date').getTime());
       try {
-        resolve({ "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0, "content_type": content_type});
+        resolve({ "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0, "content_type": content_type });
       }
       catch (error) {
-        resolve({ "subject": "", "fromto": "", "date": "", "path_file": "", "break": 1, "content_type": ""});
+        resolve({ "subject": "", "fromto": "", "date": "", "path_file": "", "break": 1, "content_type": "" });
       };
     });
     mailparser.write(eml);
