@@ -8,9 +8,6 @@ const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
 const glob = require("glob");
 const functions = require(`${__dirname}/src/functions.js`);
-const decompress = require('decompress');
-const decompressUnzip = require('decompress-unzip');
-const chokidar = require('chokidar');
 const simpleParser = require('mailparser').simpleParser;
 const dree = require('dree');
 
@@ -22,11 +19,6 @@ app.commandLine.appendSwitch('ignore-certificate-errors');
 let path_separator = path.sep;
 let path_archive = app.getPath("userData") + path_separator + "Mails Archive";
 let win;
-const watcher = chokidar.watch(path_archive, {
-  persistent: true,
-  ignored: /.eml/,
-  ignoreInitial: true,
-});
 
 // ----- Création de la fenêtre pour electron -----
 function createWindow() {
@@ -48,22 +40,7 @@ function createWindow() {
 app.on("ready", createWindow);
 
 // ----- Lancement des fonctions dans electron -----
-launch();
-
-watcher.on('add', path => {
-  console.log(`File ${path} has been added`)
-  setTimeout(function () { launch(); }, 1000);
-})
-
-// ----- Déclaration des fonctions -----
-function launch() {
-  zipDecompress().catch((err) => console.log(err)).finally(function () {
-    // arborescenceArchive().catch((err) => console.log(err)).finally(function () {
-    indexationArchive();
-    // })
-  })
-}
-
+indexationArchive();
 
 function indexationArchive() {
   // On récupère la dernière date à laquelle le dossier à été modifié.
@@ -160,85 +137,6 @@ function indexationArchive() {
         });
       }
     });
-  });
-}
-
-function zipDecompress() {
-  return new Promise((resolve, reject) => {
-    readDir(path_archive + '/*.zip').then((files) => {
-      if (files.length) {
-        for (let i = 0; i < files.length; i++) {
-          decompress(files[i], path_archive, {
-            plugins: [
-              decompressUnzip()
-            ]
-          }).then(() => {
-            console.log('Files decompressed');
-            fs.unlinkSync(files[i])
-            resolve();
-          });
-        }
-      }
-      else {
-        reject('Pas de zip');
-      }
-    });
-  });
-}
-
-function arborescenceArchive() {
-  return new Promise((resolve, reject) => {
-    if (fs.existsSync(path_archive)) {
-      if (!functions.isEmpty(path_archive)) {
-        readDir(path_archive + '/*').then((files) => {
-          for (let i = 0; i < files.length; i++) {
-            let stats = fs.statSync(files[i]).isFile();
-            if (!stats) {
-              files.splice(i, 1)
-            }
-          }
-          if (!files.length) {
-            console.log('Arborescence des fichiers complète');
-            resolve();
-          }
-          else {
-            traitementColsFiles(files).then((promises) => {
-              Promise.all(promises)
-                .then((result) => {
-                  result.forEach((value, index) => {
-                    let file_name = value.path_file.split('/');
-                    let date = new Date(value.date).toLocaleString('fr-FR', { timeZone: 'UTC' });
-                    date = date.substr(0, 10).split('/');
-                    let year = date[2];
-                    let month = date[1];
-                    let folder_month = year + '-' + month;
-                    let file_path_year = path_archive + '/' + year;
-
-                    fs.existsSync(file_path_year) ? "" : fs.mkdirSync(file_path_year);
-                    fs.existsSync(file_path_year + '/' + folder_month) ? "" : fs.mkdirSync(file_path_year + '/' + folder_month);
-
-                    fs.renameSync(value.path_file, file_path_year + '/' + folder_month + '/' + file_name[file_name.length - 1], (err) => {
-                      if (err) throw err;
-                    });
-
-                    if (index == (files.length - 1)) {
-                      resolve()
-                    }
-                  })
-                });
-            });
-            console.log('Arborescence des fichiers mis à jour');
-          }
-        });
-      }
-      else {
-        reject('Pas de mails archivés dans le dossier');
-      }
-    }
-    else {
-      fs.mkdirSync(path_archive);
-      reject('Création du dossier Mails Archive');
-    }
   });
 }
 
