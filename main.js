@@ -250,9 +250,9 @@ ipcMain.on('subfolder', (event, msg) => {
   win.webContents.send('listSubfolder', tree.children)
 });
 
-ipcMain.on('read_mail_dir', (event, msg) => {
+ipcMain.on('read_mail_dir', (event, path) => {
   new Promise((resolve, reject) => {
-    db.all("SELECT * FROM cols WHERE break != 1 ORDER BY date DESC", (err, rows) => {
+    db.all("SELECT * FROM cols WHERE break != 1 AND subfolder = '" + path + "' ORDER BY date DESC", (err, rows) => {
       if (err) {
         reject(err)
       }
@@ -321,35 +321,37 @@ ipcMain.on('attachment_select', (event, value) => {
 })
 
 ipcMain.on('mail_select', (event, uid) => {
-  fs.readFile('template/messagepreview.html', (err, data) => {
-    if (err) {
-      console.error(err)
-      return
-    }
+  if (uid != null) {
+    fs.readFile('template/messagepreview.html', (err, data) => {
+      if (err) {
+        console.error(err)
+        return
+      }
 
-    try {
-      new Promise((resolve, reject) => {
-        db.get("SELECT path_file FROM cols WHERE id = ?", uid, (err, row) => {
-          if (err) {
-            reject(err)
-          }
-          else {
-            resolve(row)
-          }
-        });
-      }).then((row) => {
-        let eml = fs.readFileSync(row.path_file, 'utf8');
+      try {
+        new Promise((resolve, reject) => {
+          db.get("SELECT path_file FROM cols WHERE id = ?", uid, (err, row) => {
+            if (err) {
+              reject(err)
+            }
+            else {
+              resolve(row)
+            }
+          });
+        }).then((row) => {
+          let eml = fs.readFileSync(row.path_file, 'utf8');
 
-        traitementMail(eml).then((mail_content) => {
-          let html = constructionMail(mail_content, data, uid);
-          win.webContents.send('mail_return', html);
+          traitementMail(eml).then((mail_content) => {
+            let html = constructionMail(mail_content, data, uid);
+            win.webContents.send('mail_return', html);
+          })
         })
-      })
-    }
-    catch (err) {
-      console.log(err);
-    }
-  })
+      }
+      catch (err) {
+        console.log(err);
+      }
+    })
+  }
 });
 
 //Parsage du mail pour afficher dans la liste
