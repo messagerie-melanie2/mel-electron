@@ -1,5 +1,5 @@
 // ----- Déclaration des libraries -----
-const { app, BrowserWindow, dialog, ipcMain, session, webContents } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, webContents } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const MailParser = require("mailparser").MailParser;
@@ -8,6 +8,7 @@ const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
 const glob = require("glob");
 const functions = require(`${__dirname}/src/functions.js`);
+const config = require(`${__dirname}/config/config.json`);
 const simpleParser = require('mailparser').simpleParser;
 const dree = require('dree');
 const { download } = require("electron-dl");
@@ -16,9 +17,7 @@ const { download } = require("electron-dl");
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
 // ----- Déclaration des variables -----
-const version_build = '0.1';
-let path_separator = path.sep;
-let path_archive = app.getPath("userData") + path_separator + "Mails Archive";
+let path_archive = app.getPath("userData") + path.sep + "Mails Archive";
 let win;
 
 // ----- Création de la fenêtre pour electron -----
@@ -35,7 +34,7 @@ function createWindow() {
   });
   // win.maximize();
   // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
-  win.webContents.loadURL('http://localhost/roundcube', { userAgent: 'Mel_Electron V.' + version_build });
+  win.webContents.loadURL(config.path, { userAgent: 'Mel_Electron V.' + config.version_build });
 }
 
 app.on("ready", createWindow);
@@ -46,8 +45,6 @@ indexationArchive();
 function indexationArchive() {
   // On récupère la dernière date à laquelle le dossier à été modifié.
   let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
-  let nb_files = 0;
-  let nb_rows = 0;
 
   db.serialize(function () {
     // On créer la bdd si elle n'existe pas.
@@ -141,9 +138,22 @@ function indexationArchive() {
   });
 }
 
-ipcMain.on('download_eml', async (event, url) => {
-  download(BrowserWindow.getFocusedWindow(), 'http://localhost/Roundcube/' + url, { directory: path_archive, filename: 'mail.eml' })
-    .then(dl => console.log(dl.getSavePath()));
+ipcMain.on('download_eml', (event, files) => {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    download(win, config.path + file, { directory: path_archive })
+    console.log('download => ' + file);
+  }
+  win.webContents.session.on('will-download', (event, item, webContents) => {
+    item.once('done', (event, state) => {
+      if (state === 'completed') {
+        console.log('Téléchargement réussi')
+      } else {
+        console.log(`Téléchargement échoué : ${state}`)
+      }
+    })
+  })
+
 });
 
 ipcMain.on('subfolder', (event, msg) => {

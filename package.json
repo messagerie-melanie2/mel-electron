@@ -5,6 +5,10 @@
       {
         "from": "template/messagepreview.html",
         "to": "template/messagepreview.html"
+      },
+      {
+        "from": "config/config.json",
+        "to": "config/config.json"
       }
     ],
     "win": {
