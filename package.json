@@ -47,6 +47,7 @@
     "app": "^0.1.0",
     "dree": "^2.4.15",
     "electron-db": "^1.0.0",
+    "electron-dl": "^3.0.2",
     "glob": "^7.1.6",
     "jquery": "^3.5.0",
     "mailparser": "^2.7.7",

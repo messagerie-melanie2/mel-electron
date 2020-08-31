@@ -1,5 +1,5 @@
 // ----- Déclaration des libraries -----
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, session, webContents } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const MailParser = require("mailparser").MailParser;
@@ -10,12 +10,13 @@ const glob = require("glob");
 const functions = require(`${__dirname}/src/functions.js`);
 const simpleParser = require('mailparser').simpleParser;
 const dree = require('dree');
-
+const { download } = require("electron-dl");
 
 // ----- On ignore le certificat de sécurité -----
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
 // ----- Déclaration des variables -----
+const version_build = '0.1';
 let path_separator = path.sep;
 let path_archive = app.getPath("userData") + path_separator + "Mails Archive";
 let win;
@@ -34,7 +35,7 @@ function createWindow() {
   });
   // win.maximize();
   // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
-  win.webContents.loadURL('http://localhost/roundcube');
+  win.webContents.loadURL('http://localhost/roundcube', { userAgent: 'Mel_Electron V.' + version_build });
 }
 
 app.on("ready", createWindow);
@@ -140,6 +141,11 @@ function indexationArchive() {
   });
 }
 
+ipcMain.on('download_eml', async (event, url) => {
+  download(BrowserWindow.getFocusedWindow(), 'http://localhost/Roundcube/' + url, { directory: path_archive, filename: 'mail.eml' })
+    .then(dl => console.log(dl.getSavePath()));
+});
+
 ipcMain.on('subfolder', (event, msg) => {
   const options = {
     extensions: []
@@ -199,7 +205,8 @@ ipcMain.on('attachment_select', (event, value) => {
 
 ipcMain.on('mail_select', (event, uid) => {
   if (uid != null) {
-    const dataPath = path.join(process.resourcesPath, 'template/messagepreview.html');
+    // const dataPath = path.join(process.resourcesPath, 'template/messagepreview.html');
+    const dataPath = 'template/messagepreview.html';
 
     fs.readFile(dataPath, (err, data) => {
       if (err) {
