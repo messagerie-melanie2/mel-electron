@@ -139,21 +139,27 @@ function indexationArchive() {
 }
 
 ipcMain.on('download_eml', (event, files) => {
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
+  if (files.length > 0) {
+    let file = files.pop();
     download(win, config.path + file, { directory: path_archive })
-    console.log('download => ' + file);
   }
+  else {
+    console.log('Dossier vide');
+  }
+
   win.webContents.session.on('will-download', (event, item, webContents) => {
     item.once('done', (event, state) => {
       if (state === 'completed') {
         console.log('Téléchargement réussi')
+        if (files.length > 0) {
+          let file = files.pop();
+          download(win, config.path + file, { directory: path_archive })
+        }
       } else {
         console.log(`Téléchargement échoué : ${state}`)
       }
     })
   })
-
 });
 
 ipcMain.on('subfolder', (event, msg) => {
