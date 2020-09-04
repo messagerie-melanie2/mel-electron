@@ -18,6 +18,9 @@ app.commandLine.appendSwitch('ignore-certificate-errors');
 
 // ----- Déclaration des variables -----
 let path_archive = app.getPath("userData") + path.sep + "Mails Archive";
+
+// On récupère la dernière date à laquelle le dossier à été modifié.
+let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
 let win;
 
 // ----- Création de la fenêtre pour electron -----
@@ -43,9 +46,6 @@ app.on("ready", createWindow);
 indexationArchive();
 
 function indexationArchive() {
-  // On récupère la dernière date à laquelle le dossier à été modifié.
-  let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
-
   db.serialize(function () {
     // On créer la bdd si elle n'existe pas.
     db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, subfolder TEXT, break TEXT, content_type TEXT, modif_date INTEGER)');
@@ -151,6 +151,11 @@ ipcMain.on('download_eml', (event, files) => {
     item.once('done', (event, state) => {
       if (state === 'completed') {
         console.log('Téléchargement réussi')
+        traitementColsFile(item.getSavePath()).then(element => {
+          db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date, content_type) VALUES(?,?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, getSubfolder(element.path_file), element.break, last_modif_date, element.content_type, function (err) {
+            if (err) console.log(err.message);
+          }).finalize();
+        });
         if (files.length > 0) {
           let file = files.pop();
           download(win, config.path + file, { directory: path_archive })
@@ -448,6 +453,24 @@ function readDir(path) {
     glob(path, (err, files) => {
       resolve(files);
     });
+  });
+}
+
+function traitementColsFile(file) {
+  return new Promise((resolve) => {
+    try {
+      new Promise((resolve) => {
+        fs.readFile(file, 'utf8', (err, eml) => {
+          if (err) console.log(err);
+          resolve(eml);
+        });
+      }).then((eml) => {
+        resolve(traitementCols(eml, file));
+      })
+    }
+    catch (err) {
+      console.error(err);
+    }
   });
 }
 
