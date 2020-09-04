@@ -141,7 +141,7 @@ function indexationArchive() {
 ipcMain.on('download_eml', (event, files) => {
   if (files.length > 0) {
     let file = files.pop();
-    download(win, config.path + file, { directory: path_archive })
+    download(win, config.path + file.url, { directory: path_archive })
   }
   else {
     console.log('Dossier vide');
@@ -158,11 +158,10 @@ ipcMain.on('download_eml', (event, files) => {
         });
         if (files.length > 0) {
           let file = files.pop();
-          download(win, config.path + file, { directory: path_archive })
+          download(win, config.path + file.url, { directory: path_archive })
         }
         else {
-          console.log('Fin du téléchargement');
-          win.webContents.send('download-finish', 'Fin du téléchargement')
+          win.webContents.send('download-finish')
         }
       } else {
         console.log(`Téléchargement échoué : ${state}`)
