@@ -8,7 +8,9 @@ const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
 const glob = require("glob");
 const functions = require(`${__dirname}/src/functions.js`);
-const config = require(`${__dirname}/config/config.json`);
+let mode = "Dev";
+// let mode = "Prod";
+const config = (mode == "Dev") ? require(`${__dirname}/config/config.json`) : require(path.join(process.resourcesPath, 'config/config.json'));
 const simpleParser = require('mailparser').simpleParser;
 const dree = require('dree');
 const { download } = require("electron-dl");
@@ -18,7 +20,6 @@ app.commandLine.appendSwitch('ignore-certificate-errors');
 
 // ----- Déclaration des variables -----
 let path_archive = app.getPath("userData") + path.sep + "Mails Archive";
-
 // On récupère la dernière date à laquelle le dossier à été modifié.
 let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
 let win;
@@ -35,8 +36,7 @@ function createWindow() {
       preload: path.resolve(`${__dirname}/src/preload.js`),
     }
   });
-  // win.maximize();
-  // win.webContents.loadURL('https://roundcube.ida.melanie2.i2');
+  win.maximize();
   win.webContents.loadURL(config.path, { userAgent: 'Mel_Electron V.' + config.version_build });
 }
 
@@ -160,6 +160,10 @@ ipcMain.on('download_eml', (event, files) => {
           let file = files.pop();
           download(win, config.path + file, { directory: path_archive })
         }
+        else {
+          console.log('Fin du téléchargement');
+          win.webContents.send('download-finish', 'Fin du téléchargement')
+        }
       } else {
         console.log(`Téléchargement échoué : ${state}`)
       }
@@ -226,10 +230,8 @@ ipcMain.on('attachment_select', (event, value) => {
 
 ipcMain.on('mail_select', (event, uid) => {
   if (uid != null) {
-    // const dataPath = path.join(process.resourcesPath, 'template/messagepreview.html');
-    const dataPath = 'template/messagepreview.html';
-
-    fs.readFile(dataPath, (err, data) => {
+    const template = (mode == "Dev") ? 'template/messagepreview.html' : path.join(process.resourcesPath, 'template/messagepreview.html');
+    fs.readFile(template, (err, data) => {
       if (err) {
         console.error(err)
         return
