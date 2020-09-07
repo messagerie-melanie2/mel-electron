@@ -1,7 +1,15 @@
+const { app } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const glob = require("glob");
 _ = require('underscore');
+
+let path_archive = app.getPath("userData") + path.sep + "Mails Archive";
+
+//On créer le dossier de mails si il n'existe pas 
+if (!fs.existsSync(path_archive)) {
+    fs.mkdirSync(path_archive);
+}
 
 module.exports = {
     getLastModifiedFolder(path) {
@@ -31,7 +39,7 @@ module.exports = {
     inParam(sql, arr) {
         return sql.replace('?#', arr.map(() => '?').join(','))
     },
-    
+
     formatBytes(bytes, decimals = 2) {
         if (bytes === 0) return '0 Bytes';
 

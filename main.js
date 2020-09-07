@@ -24,6 +24,8 @@ let path_archive = app.getPath("userData") + path.sep + "Mails Archive";
 let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
 let win;
 
+
+
 // ----- Création de la fenêtre pour electron -----
 function createWindow() {
   win = new BrowserWindow({
@@ -46,6 +48,8 @@ app.on("ready", createWindow);
 indexationArchive();
 
 function indexationArchive() {
+  
+
   db.serialize(function () {
     // On créer la bdd si elle n'existe pas.
     db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, subfolder TEXT, break TEXT, content_type TEXT, modif_date INTEGER)');
@@ -138,10 +142,20 @@ function indexationArchive() {
   });
 }
 
+function createFolderIfNotExist(mbox) {
+  let path_folder = path_archive + path.sep + mbox;
+  if (!fs.existsSync(path_folder)) {
+    fs.mkdirSync(path_folder);
+  }
+  return path_folder;
+}
+
 ipcMain.on('download_eml', (event, files) => {
+  let path_folder;
   if (files.length > 0) {
     let file = files.pop();
-    download(win, config.path + file.url, { directory: path_archive })
+    path_folder = createFolderIfNotExist(file.mbox)
+    download(win, config.path + file.url, { directory: path_folder })
   }
   else {
     console.log('Dossier vide');
@@ -150,15 +164,15 @@ ipcMain.on('download_eml', (event, files) => {
   win.webContents.session.on('will-download', (event, item, webContents) => {
     item.once('done', (event, state) => {
       if (state === 'completed') {
-        console.log('Téléchargement réussi')
         traitementColsFile(item.getSavePath()).then(element => {
           db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date, content_type) VALUES(?,?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, getSubfolder(element.path_file), element.break, last_modif_date, element.content_type, function (err) {
             if (err) console.log(err.message);
           }).finalize();
         });
+        console.log(files.length);
         if (files.length > 0) {
           let file = files.pop();
-          download(win, config.path + file.url, { directory: path_archive })
+          download(win, config.path + file.url, { directory: path_folder })
         }
         else {
           win.webContents.send('download-finish')
@@ -442,6 +456,7 @@ function constructionMail(result, data, uid) {
 }
 
 function getSubfolder(path) {
+  path = path.replace(/\\/g, "/");
   path = path.split('Mails Archive/');
   let subfolder = path.pop();
   subfolder = subfolder.split('/');
