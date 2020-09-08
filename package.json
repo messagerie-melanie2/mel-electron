@@ -56,6 +56,7 @@
     "jquery": "^3.5.0",
     "mailparser": "^2.7.7",
     "sqlite3": "^5.0.0",
-    "underscore": "^1.10.2"
+    "underscore": "^1.10.2",
+    "utf7": "^1.0.2"
   }
 }

@@ -14,7 +14,7 @@ const config = (mode == "Dev") ? require(`${__dirname}/config/config.json`) : re
 const simpleParser = require('mailparser').simpleParser;
 const dree = require('dree');
 const { download } = require("electron-dl");
-
+const utf7 = require('utf7').imap;
 // ----- On ignore le certificat de sécurité -----
 app.commandLine.appendSwitch('ignore-certificate-errors');
 
@@ -143,6 +143,7 @@ function indexationArchive() {
 }
 
 function createFolderIfNotExist(mbox) {
+  mbox = utf7.decode(mbox);
   let path_folder = path_archive + path.sep + mbox;
   if (!fs.existsSync(path_folder)) {
     fs.mkdirSync(path_folder);
