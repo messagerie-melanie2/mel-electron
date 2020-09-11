@@ -313,6 +313,7 @@ function traitementMail(eml) {
       mail_content.to = headers.get('to');
       mail_content.cc = headers.get('cc');
       mail_content.date = headers.get('date');
+      mail_content.contentType = headers.get('content-type');
     });
     mailparser.on("data", function (mail_object) {
       if (mail_object.type === 'attachment') {
