@@ -8,8 +8,8 @@ const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
 const glob = require("glob");
 const functions = require(`${__dirname}/src/functions.js`);
-let mode = "Dev";
-// let mode = "Prod";
+// let mode = "Dev";
+let mode = "Prod";
 const config = (mode == "Dev") ? require(`${__dirname}/config/config.json`) : require(path.join(process.resourcesPath, 'config/config.json'));
 const simpleParser = require('mailparser').simpleParser;
 const dree = require('dree');
@@ -147,7 +147,7 @@ function createFolderIfNotExist(mbox) {
   mbox = utf7.decode(mbox);
   let path_folder = path_archive + path.sep + mbox;
   if (!fs.existsSync(path_folder)) {
-    fs.mkdirSync(path_folder);
+    fs.mkdirSync(path_folder, { recursive: true });
     win.webContents.send('new_folder')
   }
   return path_folder;
