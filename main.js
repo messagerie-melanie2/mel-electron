@@ -40,6 +40,7 @@ function createWindow() {
   });
   win.maximize();
   win.webContents.loadURL(config.path, { userAgent: 'Mel_Electron V.' + config.version_build });
+
 }
 
 app.on("ready", createWindow);
@@ -48,7 +49,7 @@ app.on("ready", createWindow);
 indexationArchive();
 
 function indexationArchive() {
-  
+
 
   db.serialize(function () {
     // On créer la bdd si elle n'existe pas.
@@ -183,6 +184,10 @@ ipcMain.on('download_eml', (event, files) => {
       }
     })
   })
+});
+
+ipcMain.on('archive_folder?', (event, msg) => {
+  win.webContents.send('archive_folder', config.archive_folder);
 });
 
 ipcMain.on('subfolder', (event, msg) => {

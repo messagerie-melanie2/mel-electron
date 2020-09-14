@@ -1,4 +1,5 @@
 {
-    "path": "https://rcube.preprod.m2.e2.rie.gouv.fr/",
+    "path": "http://localhost/roundcube/",
+    "archive_folder": "Archives locales",
     "version_build": "0.1"
 }

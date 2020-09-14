@@ -10,13 +10,13 @@ contextBridge.exposeInMainWorld(
     "api", {
     send: (channel, data) => {
         // whitelist channels
-        let validChannels = ["read_mail_dir", "mail_select", "attachment_select", "subfolder", "download_eml"];
+        let validChannels = ["read_mail_dir", "mail_select", "attachment_select", "subfolder", "download_eml", "archive_folder?"];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
         }
     },
     receive: (channel, func) => {
-        let validChannels = ["mail_dir", "mail_return", "busy-loader", "listSubfolder", "download-finish"];
+        let validChannels = ["mail_dir", "mail_return", "busy-loader", "listSubfolder", "download-finish", "archive_folder"];
         if (validChannels.includes(channel)) {
             // Deliberately strip event as it includes `sender` 
 
