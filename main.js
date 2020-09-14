@@ -188,8 +188,24 @@ ipcMain.on('download_eml', (event, files) => {
   })
 });
 
+ipcMain.on('search_list', (event, search) => {
+  console.log(search);
+  new Promise((resolve, reject) => {
+    db.all("SELECT * FROM cols WHERE break != 1 AND subject LIKE '%" + search + "%' ORDER BY date DESC", (err, rows) => {
+      if (err) {
+        reject(err)
+      }
+      else {
+        resolve(rows)
+      }
+    });
+  }).then((value) => {
+    win.webContents.send('result_search', value)
+  })
+});
+
 // ----- Envoi le nom du dossier d'archive au plugin electron ----- 
-ipcMain.on('archive_folder?', (event, msg) => {
+ipcMain.on('get_archive_folder', (event, msg) => {
   win.webContents.send('archive_folder', config.archive_folder);
 });
 
