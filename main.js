@@ -186,10 +186,12 @@ ipcMain.on('download_eml', (event, files) => {
   })
 });
 
+// ----- Envoi le nom du dossier d'archive au plugin electron ----- 
 ipcMain.on('archive_folder?', (event, msg) => {
   win.webContents.send('archive_folder', config.archive_folder);
 });
 
+// ----- Envoi la liste des sous-dossier dans le dossier 'Mails archive' au plugin electron  ----- 
 ipcMain.on('subfolder', (event, msg) => {
   const options = {
     extensions: []
@@ -198,6 +200,7 @@ ipcMain.on('subfolder', (event, msg) => {
   win.webContents.send('listSubfolder', tree.children)
 });
 
+// ----- Envoi la liste des mails d'un dossier au plugin electron  ----- 
 ipcMain.on('read_mail_dir', (event, path) => {
   new Promise((resolve, reject) => {
     db.all("SELECT * FROM cols WHERE break != 1 AND subfolder = '" + path + "' ORDER BY date DESC", (err, rows) => {
@@ -247,6 +250,7 @@ ipcMain.on('attachment_select', (event, value) => {
   }
 })
 
+// ----- Envoi le mail sélectionné au plugin electron ----- 
 ipcMain.on('mail_select', (event, uid) => {
   if (uid != null) {
     const template = (mode == "Dev") ? 'template/messagepreview.html' : path.join(process.resourcesPath, 'template/messagepreview.html');
@@ -282,7 +286,7 @@ ipcMain.on('mail_select', (event, uid) => {
   }
 });
 
-//Parsage du mail pour afficher dans la liste
+// ----- Traitement des mails pour récupérer infos utiles ----- 
 function traitementCols(eml, path_file) {
   return new Promise((resolve) => {
     let subject = "";
@@ -306,7 +310,7 @@ function traitementCols(eml, path_file) {
   })
 }
 
-//Parsage du mail pour récupérer les infos
+// ----- Parsage du mail pour récupérer les infos ----- 
 function traitementMail(eml) {
   return new Promise((resolve) => {
     let attachments = [];
@@ -356,7 +360,7 @@ function traitementMail(eml) {
 }
 
 
-//Parsage du mail pour récupérer les pièces jointes
+// ----- Parsage du mail pour récupérer les pièces jointes ----- 
 function traitementAttachment(eml, partid) {
   return new Promise((resolve) => {
     simpleParser(eml, (err, parsed) => {
@@ -371,7 +375,7 @@ function traitementAttachment(eml, partid) {
   })
 }
 
-//Assemblage du mail et du html
+// ----- Assemblage du mail et du html ----- 
 function constructionMail(result, data, uid) {
   let to = "";
   let cc = "";
