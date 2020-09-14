@@ -148,10 +148,11 @@ function createFolderIfNotExist(mbox) {
   let path_folder = path_archive + path.sep + mbox;
   if (!fs.existsSync(path_folder)) {
     fs.mkdirSync(path_folder);
+    win.webContents.send('new_folder')
   }
   return path_folder;
 }
-
+// ----- Téléchargement des mails avec le plugin mel_archivage ----- 
 ipcMain.on('download_eml', (event, files) => {
   let path_folder;
   if (files.length > 0) {
@@ -169,6 +170,7 @@ ipcMain.on('download_eml', (event, files) => {
         traitementColsFile(item.getSavePath()).then(element => {
           db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date, content_type) VALUES(?,?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, getSubfolder(element.path_file), element.break, last_modif_date, element.content_type, function (err) {
             if (err) console.log(err.message);
+            else win.webContents.send('add_message_row', { id: this.lastID, subject: element.subject, fromto: element.fromto, date: element.date, content_type: element.content_type, mbox: getSubfolder(element.path_file) });
           }).finalize();
         });
         console.log(files.length);
