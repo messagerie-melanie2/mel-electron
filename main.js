@@ -1,5 +1,6 @@
 // ----- Déclaration des libraries -----
 const { app, BrowserWindow, dialog, ipcMain, webContents } = require('electron');
+require('dotenv').config()
 const fs = require('fs');
 const path = require('path');
 const MailParser = require("mailparser").MailParser;
@@ -8,9 +9,7 @@ const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(app.getPath("userData") + '/archivage_mails.db');
 const glob = require("glob");
 const functions = require(`${__dirname}/src/functions.js`);
-// let mode = "Dev";
-let mode = "Prod";
-const config = (mode == "Dev") ? require(`${__dirname}/config/config.json`) : require(path.join(process.resourcesPath, 'config/config.json'));
+process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive');
 const simpleParser = require('mailparser').simpleParser;
 const dree = require('dree');
 const { download } = require("electron-dl");
@@ -23,8 +22,6 @@ let path_archive = app.getPath("userData") + path.sep + "Mails Archive";
 // On récupère la dernière date à laquelle le dossier à été modifié.
 let last_modif_date = Math.max(functions.getLastModifiedFolder(path_archive), functions.getLastModifiedFile(path_archive));
 let win;
-
-
 
 // ----- Création de la fenêtre pour electron -----
 function createWindow() {
@@ -39,7 +36,7 @@ function createWindow() {
     }
   });
   win.maximize();
-  win.webContents.loadURL(config.path, { userAgent: 'Mel_Electron V.' + config.version_build });
+  win.webContents.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD });
 
 }
 
@@ -158,7 +155,7 @@ ipcMain.on('download_eml', (event, files) => {
   if (files.length > 0) {
     let file = files.pop();
     path_folder = createFolderIfNotExist(file.mbox)
-    download(win, config.path + file.url, { directory: path_folder })
+    download(win, process.env.LOAD_PATH + file.url, { directory: path_folder })
   }
   else {
     console.log('Dossier vide');
@@ -176,7 +173,7 @@ ipcMain.on('download_eml', (event, files) => {
         console.log(files.length);
         if (files.length > 0) {
           let file = files.pop();
-          download(win, config.path + file.url, { directory: path_folder })
+          download(win, process.env.LOAD_PATH + file.url, { directory: path_folder })
         }
         else {
           win.webContents.send('download-finish')
@@ -206,7 +203,7 @@ ipcMain.on('search_list', (event, search) => {
 
 // ----- Envoi le nom du dossier d'archive au plugin electron ----- 
 ipcMain.on('get_archive_folder', (event, msg) => {
-  win.webContents.send('archive_folder', config.archive_folder);
+  win.webContents.send('archive_folder', process.env.ARCHIVE_FOLDER);
 });
 
 // ----- Envoi la liste des sous-dossier dans le dossier 'Mails archive' au plugin electron  ----- 
@@ -271,7 +268,7 @@ ipcMain.on('attachment_select', (event, value) => {
 // ----- Envoi le mail sélectionné au plugin electron ----- 
 ipcMain.on('mail_select', (event, uid) => {
   if (uid != null) {
-    const template = (mode == "Dev") ? 'template/messagepreview.html' : path.join(process.resourcesPath, 'template/messagepreview.html');
+    const template = (process.env.DEV_MODE == "Dev") ? 'template/messagepreview.html' : path.join(process.resourcesPath, 'template/messagepreview.html');
     fs.readFile(template, (err, data) => {
       if (err) {
         console.error(err)
