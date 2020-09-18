@@ -53,7 +53,7 @@ module.exports = {
     })
   },
 
-  // ----- Assemblage du mail et du html ----- 
+  // Assemblage du mail et du html 
   constructionMail(result, data, uid) {
     let to = "";
     let cc = "";
@@ -144,7 +144,7 @@ module.exports = {
     return html;
   },
 
-  // ----- Parsage du mail pour récupérer les pièces jointes ----- 
+  // Parsage du mail pour récupérer les pièces jointes 
   traitementAttachment(eml, partid) {
     return new Promise((resolve) => {
       simpleParser(eml, (err, parsed) => {
@@ -159,7 +159,7 @@ module.exports = {
     })
   },
 
-  // ----- Traitement des mails pour récupérer infos utiles ----- 
+  // Traitement des mails pour récupérer infos utiles 
   traitementCols(eml, path_file) {
     return new Promise((resolve) => {
       let subject = "";

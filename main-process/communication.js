@@ -82,7 +82,7 @@ ipcMain.on('attachment_select', (event, value) => {
 })
 
 
-// ----- Téléchargement des mails avec le plugin mel_archivage ----- 
+// Téléchargement des mails avec le plugin mel_archivage 
 ipcMain.on('download_eml', (event, files) => {
   let path_folder;
   if (files.length > 0) {
