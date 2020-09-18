@@ -1,5 +1,6 @@
 const MailParser = require("mailparser").MailParser;
 const simpleParser = require('mailparser').simpleParser;
+const functions = require('./functions.js');
 
 module.exports = {
 
@@ -131,10 +132,10 @@ module.exports = {
         else {
           let filename = element['filename'];
           let ctype = element['ctype'].split('/');
-          let size = " (~" + functions.formatBytes(element['buf'].toString().length, 0) + ")";
+          // let size = " (~" + functions.formatBytes(element['buf'].toString().length, 0) + ")";
 
           html = html.replace('style="display: none;"', '');
-          html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + "," + element["partid"] + ")' id='attachment' title='" + filename + size + "'>" + filename + size + "</a></li>%%ATTACHMENT%%");
+          html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + "," + element["partid"] + ")' id='attachment' title='" + filename  + "'>" + filename + "</a></li>%%ATTACHMENT%%");
         }
       })
     }

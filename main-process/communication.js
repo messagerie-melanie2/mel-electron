@@ -23,20 +23,20 @@ ipcMain.on('subfolder', (event, msg) => {
 
 // Recherche de l'utilisateur dans la BDD 
 ipcMain.on('search_list', (event, search_request) => {
-  event.sender.send('result_search', db.db_search(search_request))
+  db.db_search(search_request).then((value) => {
+    event.sender.send('result_search', value)
+  })
 });
 
 // Envoi la liste des mails d'un dossier au plugin electron  
 ipcMain.on('read_mail_dir', (event, path) => {
   db.db_read_mail_dir(path).then((value) => {
-    console.log(value);
     event.sender.send('mail_dir', value)
   });
 })
 
 // Envoi le mail sélectionné au plugin electron 
 ipcMain.on('mail_select', (event, uid) => {
-  console.log(uid);
   if (uid != null) {
     const template = (process.env.DEV_MODE == "Dev") ? 'template/messagepreview.html' : path.join(process.resourcesPath, 'template/messagepreview.html');
     fs.readFile(template, (err, data) => {
@@ -48,7 +48,7 @@ ipcMain.on('mail_select', (event, uid) => {
       db.db_mail_select(uid).then((row) => {
 
         let eml = fs.readFileSync(row.path_file, 'utf8');
-        
+
         mail.traitementMail(eml).then((mail_content) => {
           let html = mail.constructionMail(mail_content, data, uid);
           event.sender.send('mail_return', html);
@@ -61,21 +61,24 @@ ipcMain.on('mail_select', (event, uid) => {
 // Envoi la pièce jointe sélectionné au plugin electron
 ipcMain.on('attachment_select', (event, value) => {
 
-  let eml = fs.readFileSync(db.db_attachment_select(value).path_file, 'utf8');
+  db.db_attachment_select(value).then((row) => {
+    let eml = fs.readFileSync(row.path_file, 'utf8');
 
-  mail.traitementAttachment(eml, value.partid)
-    .then((result) => {
-      const options = {
-        title: "Enregistrer un fichier",
-        defaultPath: path.join(app.getPath('downloads'), result.filename),
-      }
-      dialog.showSaveDialog(null, options).then(response => {
-        fs.writeFileSync(response.filePath, result.content, (err) => {
-          if (err) throw err;
-        })
-        shell.openPath(response.filePath);
-      });
-    })
+    mail.traitementAttachment(eml, value.partid)
+      .then((result) => {
+        const options = {
+          title: "Enregistrer un fichier",
+          defaultPath: path.join(app.getPath('downloads'), result.filename),
+        }
+        dialog.showSaveDialog(null, options).then(response => {
+          fs.writeFileSync(response.filePath, result.content, (err) => {
+            if (err) throw err;
+          })
+          shell.openPath(response.filePath);
+        });
+      })
+  })
+
 })
 
 

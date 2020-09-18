@@ -11,7 +11,7 @@ db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fr
 module.exports = {
   db_search(search_request) {
     try {
-      new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         db.all("SELECT * FROM cols WHERE break != 1 AND subject LIKE '%" + search_request.value + "%' AND subfolder = '" + search_request.subfolder + "' ORDER BY date DESC", (err, rows) => {
           if (err) {
             reject(err)
@@ -20,8 +20,6 @@ module.exports = {
             resolve(rows)
           }
         });
-      }).then((value) => {
-        return value;
       })
     }
     catch (err) { console.log(err) }
@@ -61,7 +59,7 @@ module.exports = {
 
   db_attachment_select(value) {
     try {
-      new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         db.get("SELECT path_file FROM cols WHERE id = ?", value.uid, (err, row) => {
           if (err) {
             reject(err)
@@ -70,8 +68,6 @@ module.exports = {
             resolve(row)
           }
         });
-      }).then((row) => {
-        return row;
       })
     }
     catch (err) { console.log(err) }
