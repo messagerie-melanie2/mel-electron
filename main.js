@@ -2,10 +2,10 @@ const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const glob = require('glob')
 require('dotenv').config({path:path.join(process.resourcesPath, '.env')})
-
 process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive');
 
 let mainWindow = null
+app.commandLine.appendSwitch('ignore-certificate-errors');
 
 function initialize() {
   loadApp();

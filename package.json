@@ -12,12 +12,14 @@
       }
     ],
     "win": {
+      "icon": "icons/mel.ico",
       "target": [
         "nsis"
       ]
     },
     "linux": {
       "category": "Utility",
+      "icon": "icons/mel.ico",
       "target": [
         "deb"
       ]

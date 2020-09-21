@@ -108,9 +108,8 @@ ipcMain.on('download_eml', (events, files) => {
           download(BrowserWindow.getAllWindows()[0], path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
         }
         else {
-          console.log('download-finish');
-          session.defaultSession.removeAllListeners();
           events.sender.send('download-finish');
+          session.defaultSession.removeAllListeners();
         }
       } else {
         console.log(`Téléchargement échoué : ${state}`)
