@@ -94,11 +94,10 @@ ipcMain.on('download_eml', (event, files) => {
     console.log('Dossier vide');
   }
 
-  session.defaultSession.on('will-download', (event, item, webContents) => {
-    item.once('done', (event, state) => {
+  session.defaultSession.on('will-download', (events, item, webContents) => {
+    item.once('done', (events, state) => {
       if (state === 'completed') {
-        functions.traitementColsFiles(item.getSavePath()).then(element => {
-          console.log(element);
+        functions.traitementColsFile(item.getSavePath()).then(element => {
           db.db_insert_archive(element);
         });
         console.log(files.length);

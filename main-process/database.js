@@ -75,7 +75,7 @@ module.exports = {
 
   db_insert_archive(element) {
     try {
-      db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, modif_date, content_type) VALUES(?,?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, functions.getSubfolder(element.path_file), element.break, last_modif_date, element.content_type, function (err) {
+      db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, content_type) VALUES(?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, functions.getSubfolder(element.path_file), element.break, element.content_type, function (err) {
         if (err) console.log(err.message);
       }).finalize();
     }

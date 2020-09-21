@@ -13,30 +13,22 @@ module.exports = {
     return path_folder;
   },
 
-  traitementColsFiles(files) {
+  traitementColsFile(file) {
     return new Promise((resolve) => {
-      let promises = [];
-      new Promise((resolve) => {
-        files.forEach((file) => {
-          try {
-            new Promise((resolve) => {
-              fs.readFile(file, 'utf8', (err, eml) => {
-                if (err) console.log(err);
-                resolve(eml);
-              });
-            }).then((eml) => {
-              promises.push(mail.traitementCols(eml, file));
-              if (promises.length == files.length) {
-                resolve();
-              };
-            })
-          }
-          catch (err) {
-            console.error(err);
-          }
-        });
-      }).then(() => resolve(promises));
-    })
+      try {
+        new Promise((resolve) => {
+          fs.readFile(file, 'utf8', (err, eml) => {
+            if (err) console.log(err);
+            resolve(eml);
+          });
+        }).then((eml) => {
+          resolve(mail.traitementCols(eml, file));
+        })
+      }
+      catch (err) {
+        console.error(err);
+      }
+    });
   },
 
   getSubfolder(path) {
