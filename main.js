@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow } = require('electron');
 const path = require('path')
 const glob = require('glob')
 require('dotenv').config()

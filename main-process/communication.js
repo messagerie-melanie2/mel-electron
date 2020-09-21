@@ -1,4 +1,4 @@
-const { app, dialog, ipcMain, shell } = require('electron');
+const { app, dialog, ipcMain, shell, BrowserWindow, session } = require('electron');
 const { download } = require("electron-dl");
 const functions = require('./functions.js');
 const db = require('./database.js');
@@ -88,22 +88,23 @@ ipcMain.on('download_eml', (event, files) => {
   if (files.length > 0) {
     let file = files.pop();
     path_folder = functions.createFolderIfNotExist(file.mbox)
-    download(ipcMain, path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
+    download(BrowserWindow.getFocusedWindow(), path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
   }
   else {
     console.log('Dossier vide');
   }
 
-  ipcMain.webContents.session.on('will-download', (event, item, webContents) => {
+  session.defaultSession.on('will-download', (event, item, webContents) => {
     item.once('done', (event, state) => {
       if (state === 'completed') {
-        functions.traitementColsFile(item.getSavePath()).then(element => {
+        functions.traitementColsFiles(item.getSavePath()).then(element => {
+          console.log(element);
           db.db_insert_archive(element);
         });
         console.log(files.length);
         if (files.length > 0) {
           let file = files.pop();
-          download(ipcMain, path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
+          download(BrowserWindow.getFocusedWindow(), path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
         }
         else {
           event.sender.send('download-finish')
