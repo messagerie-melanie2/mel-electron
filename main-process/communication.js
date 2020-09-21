@@ -88,7 +88,7 @@ ipcMain.on('download_eml', (event, files) => {
   if (files.length > 0) {
     let file = files.pop();
     path_folder = functions.createFolderIfNotExist(file.mbox)
-    download(BrowserWindow.getFocusedWindow(), path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
+    download(BrowserWindow.getAllWindows()[0], path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
   }
   else {
     console.log('Dossier vide');
@@ -103,7 +103,7 @@ ipcMain.on('download_eml', (event, files) => {
         console.log(files.length);
         if (files.length > 0) {
           let file = files.pop();
-          download(BrowserWindow.getFocusedWindow(), path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
+          download(BrowserWindow.getAllWindows()[0], path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
         }
         else {
           event.sender.send('download-finish')

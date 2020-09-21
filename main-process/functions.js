@@ -1,3 +1,4 @@
+const { BrowserWindow } = require('electron');
 const mail = require('./mail.js');
 const utf7 = require('utf7').imap;
 const path = require('path');
@@ -9,6 +10,7 @@ module.exports = {
     let path_folder = path.join(process.env.PATH_ARCHIVE, mbox);
     if (!fs.existsSync(path_folder)) {
       fs.mkdirSync(path_folder, { recursive: true });
+      BrowserWindow.getAllWindows()[0].send('new_folder');
     }
     return path_folder;
   },
@@ -50,5 +52,5 @@ module.exports = {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-  }
+  }, 
 }

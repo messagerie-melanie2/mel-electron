@@ -1,4 +1,4 @@
-const { app } = require('electron');
+const { app, BrowserWindow } = require('electron');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const functions = require('./functions.js');
@@ -7,6 +7,7 @@ const db = new sqlite3.Database(path.join(app.getPath("userData"), 'archivage_ma
 
 // Création de la bdd si elle n'existe pas.
 db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, subfolder TEXT, break TEXT, content_type TEXT, modif_date INTEGER)');
+
 
 module.exports = {
   db_search(search_request) {
@@ -77,6 +78,7 @@ module.exports = {
     try {
       db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, content_type) VALUES(?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, element.path_file, functions.getSubfolder(element.path_file), element.break, element.content_type, function (err) {
         if (err) console.log(err.message);
+        else BrowserWindow.getAllWindows()[0].send('add_message_row', { id: this.lastID, subject: element.subject, fromto: element.fromto, date: element.date, content_type: element.content_type, mbox: functions.getSubfolder(element.path_file) });
       }).finalize();
     }
     catch (err) { console.log(err) }
