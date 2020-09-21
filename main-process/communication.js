@@ -83,7 +83,8 @@ ipcMain.on('attachment_select', (event, value) => {
 
 
 // Téléchargement des mails avec le plugin mel_archivage 
-ipcMain.on('download_eml', (event, files) => {
+ipcMain.on('download_eml', (events, files) => {
+  console.log('-- Début du téléchargement des mails --');
   let path_folder;
   if (files.length > 0) {
     let file = files.pop();
@@ -94,8 +95,9 @@ ipcMain.on('download_eml', (event, files) => {
     console.log('Dossier vide');
   }
 
-  session.defaultSession.on('will-download', (events, item, webContents) => {
-    item.once('done', (events, state) => {
+  session.defaultSession.on('will-download', (event, item, webContents) => {
+    console.log('-- Passage will-download --');
+    item.on('done', (event, state) => {
       if (state === 'completed') {
         functions.traitementColsFile(item.getSavePath()).then(element => {
           db.db_insert_archive(element);
@@ -106,7 +108,9 @@ ipcMain.on('download_eml', (event, files) => {
           download(BrowserWindow.getAllWindows()[0], path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
         }
         else {
-          event.sender.send('download-finish')
+          console.log('download-finish');
+          session.defaultSession.removeAllListeners();
+          events.sender.send('download-finish');
         }
       } else {
         console.log(`Téléchargement échoué : ${state}`)
