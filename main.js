@@ -1,8 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const glob = require('glob')
-require('dotenv').config()
-const fs = require('fs');
+require('dotenv').config({path:path.join(process.resourcesPath, '.env')})
 
 process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive');
 
@@ -54,12 +53,4 @@ function loadApp() {
   files.forEach((file) => { require(file) })
 }
 
-//Création du dossier d'archive des mails si il n'existe pas
-function createArchiveFolder() {
-  if (!fs.existsSync(process.env.PATH_ARCHIVE)) {
-    fs.mkdirSync(process.env.PATH_ARCHIVE);
-  }
-}
-
-initialize();
-createArchiveFolder();
+initialize()
