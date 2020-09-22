@@ -1,11 +1,14 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const glob = require('glob')
-require('dotenv').config({path:path.join(process.resourcesPath, '.env')})
-process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive');
+const fs = require('fs')
+
+// require('dotenv').config({path:path.join(process.resourcesPath, '.env')})
+require('dotenv').config()
+process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive')
 
 let mainWindow = null
-app.commandLine.appendSwitch('ignore-certificate-errors');
+app.commandLine.appendSwitch('ignore-certificate-errors')
 
 function initialize() {
   loadApp();
@@ -23,7 +26,7 @@ function initialize() {
     }
 
     mainWindow = new BrowserWindow(WindowOptions);
-    mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD });
+    mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD })
 
     mainWindow.on('closed', () => {
       mainWindow = null
@@ -53,4 +56,11 @@ function loadApp() {
   files.forEach((file) => { require(file) })
 }
 
+function createArchiveFolder() {
+  if (!fs.existsSync(process.env.PATH_ARCHIVE)) {
+    fs.mkdirSync(process.env.PATH_ARCHIVE)
+  }
+}
+
 initialize()
+createArchiveFolder()
