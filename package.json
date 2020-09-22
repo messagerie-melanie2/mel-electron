@@ -7,8 +7,8 @@
         "to": "template/messagepreview.html"
       },
       {
-        "from": "config/config.json",
-        "to": "config/config.json"
+        "from": ".env",
+        "to": ".env"
       }
     ],
     "win": {
@@ -19,7 +19,7 @@
     },
     "linux": {
       "category": "Utility",
-      "icon": "icones/mel.png",
+      "icon": "icons/mel.ico",
       "target": [
         "deb"
       ]
@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "app": "^0.1.0",
+    "dotenv": "^8.2.0",
     "dree": "^2.4.15",
     "electron-db": "^1.0.0",
     "electron-dl": "^3.0.2",
