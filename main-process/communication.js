@@ -96,7 +96,6 @@ ipcMain.on('download_eml', (events, files) => {
   }
 
   session.defaultSession.on('will-download', (event, item, webContents) => {
-    console.log('-- Passage will-download --');
     item.on('done', (event, state) => {
       if (state === 'completed') {
         functions.traitementColsFile(item.getSavePath()).then(element => {

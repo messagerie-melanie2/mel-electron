@@ -7,6 +7,7 @@ const fs = require('fs');
 module.exports = {
   createFolderIfNotExist(mbox) {
     mbox = utf7.decode(mbox);
+    mbox = translateFolder(mbox);
     let path_folder = path.join(process.env.PATH_ARCHIVE, mbox);
     if (!fs.existsSync(path_folder)) {
       fs.mkdirSync(path_folder, { recursive: true });
@@ -52,5 +53,24 @@ module.exports = {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-  }, 
+  },
+}
+
+function translateFolder(name) {
+  switch (name) {
+    case 'INBOX':
+      return 'Boite de réception'
+    case 'Drafts':
+      return 'Brouillons'
+    case 'Sent':
+      return 'Envoyés'
+    case 'Trash':
+      return 'Corbeille'
+    case 'Junk':
+      return 'Indésirable'
+    case 'Templates':
+      return 'Modèles'
+    default:
+      return name;
+  }
 }

@@ -27,6 +27,7 @@ function initialize() {
 
     mainWindow = new BrowserWindow(WindowOptions);
     mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD })
+    mainWindow.maximize()
 
     mainWindow.on('closed', () => {
       mainWindow = null
