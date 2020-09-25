@@ -6,7 +6,7 @@ const db = new sqlite3.Database(path.join(app.getPath("userData"), 'archivage_ma
 
 
 // Création de la bdd si elle n'existe pas.
-db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, subfolder TEXT, break TEXT, content_type TEXT, modif_date INTEGER)');
+db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, subfolder TEXT, break TEXT, content_type TEXT, etiquettes TEXT, modif_date INTEGER)');
 
 
 module.exports = {
