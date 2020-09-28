@@ -125,3 +125,15 @@ ipcMain.on('download_eml', (events, files) => {
     })
   })
 });
+
+ipcMain.on('read_unread', (events, etiquettes) => {
+  let uid = etiquettes.uid
+  delete etiquettes.uid;
+  db.db_update_etiquettes(uid, JSON.stringify(etiquettes));
+});
+
+ipcMain.on('flag_unflagged', (events, etiquettes) => {
+  let uid = etiquettes.uid
+  delete etiquettes.uid;
+  db.db_update_etiquettes(uid, JSON.stringify(etiquettes));
+});
