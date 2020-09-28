@@ -85,7 +85,6 @@ ipcMain.on('attachment_select', (event, value) => {
 // Téléchargement des mails avec le plugin mel_archivage 
 ipcMain.on('download_eml', (events, files) => {
   let copy_files = [...files];
-
   events.sender.send('download-count', files.length);
   let path_folder;
   if (files.length > 0) {
@@ -100,7 +99,14 @@ ipcMain.on('download_eml', (events, files) => {
   session.defaultSession.on('will-download', (event, item, webContents) => {
     item.on('done', (event, state) => {
       if (state === 'completed') {
+        let uid = new URLSearchParams(item.getURL()).get('_uid');
+        let file = copy_files.find((post) => {
+          if (post.uid == uid) {
+            return true;
+          }
+        })
         functions.traitementColsFile(item.getSavePath()).then(element => {
+          element.etiquettes = JSON.stringify(file.etiquettes);
           db.db_insert_archive(element);
         });
         console.log(files.length);
