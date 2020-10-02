@@ -16,7 +16,7 @@ contextBridge.exposeInMainWorld(
         }
     },
     receive: (channel, func) => {
-        let validChannels = ["mail_dir", "mail_return", "busy-loader", "listSubfolder", "download-finish", "download-count", "archive_folder", "new_folder", "add_message_row", "result_search"];
+        let validChannels = ["mail_dir", "mail_return", "busy-loader", "listSubfolder", "download-finish", "download-advancement", "archive_folder", "new_folder", "add_message_row", "result_search"];
         if (validChannels.includes(channel)) {
             // Deliberately strip event as it includes `sender` 
 

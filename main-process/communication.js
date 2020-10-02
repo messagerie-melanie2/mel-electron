@@ -85,7 +85,7 @@ ipcMain.on('attachment_select', (event, value) => {
 // Téléchargement des mails avec le plugin mel_archivage 
 ipcMain.on('download_eml', (events, files) => {
   let copy_files = [...files];
-  events.sender.send('download-count', files.length);
+  events.sender.send('download-advancement', { "length": files.length });
   let path_folder;
   if (files.length > 0) {
     let file = files.pop();
@@ -110,7 +110,7 @@ ipcMain.on('download_eml', (events, files) => {
           db.db_insert_archive(element);
         });
         console.log(files.length);
-        events.sender.send('download-count', files.length);
+        events.sender.send('download-advancement', { "length": files.length, "uid": file.uid, "mbox": file.mbox });
         if (files.length > 0) {
           let file = files.pop();
           download(BrowserWindow.getAllWindows()[0], path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
