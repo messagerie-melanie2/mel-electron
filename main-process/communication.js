@@ -84,13 +84,13 @@ ipcMain.on('attachment_select', (event, value) => {
 
 // Téléchargement des mails avec le plugin mel_archivage 
 ipcMain.on('download_eml', (events, files) => {
-  console.log('-- Début du téléchargement des mails --');
-  events.sender.send('download-count', files.length);
+  let copy_files = [...files];
+  events.sender.send('download-advancement', { "length": files.length });
   let path_folder;
   if (files.length > 0) {
     let file = files.pop();
     path_folder = functions.createFolderIfNotExist(file.mbox)
-    download(BrowserWindow.getAllWindows()[0], path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
+    download(events.sender, path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
   }
   else {
     console.log('Dossier vide');
@@ -99,17 +99,24 @@ ipcMain.on('download_eml', (events, files) => {
   session.defaultSession.on('will-download', (event, item, webContents) => {
     item.on('done', (event, state) => {
       if (state === 'completed') {
+        let uid = new URLSearchParams(item.getURL()).get('_uid');
+        let file = copy_files.find((post) => {
+          if (post.uid == uid) {
+            return true;
+          }
+        })
         functions.traitementColsFile(item.getSavePath()).then(element => {
+          element.etiquettes = JSON.stringify(file.etiquettes);
           db.db_insert_archive(element);
         });
         console.log(files.length);
-        events.sender.send('download-count', files.length);
+        events.sender.send('download-advancement', { "length": files.length, "uid": file.uid, "mbox": file.mbox });
         if (files.length > 0) {
           let file = files.pop();
-          download(BrowserWindow.getAllWindows()[0], path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
+          download(events.sender, path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
         }
         else {
-          events.sender.send('download-finish');
+          events.sender.send('download-finish', copy_files);
           session.defaultSession.removeAllListeners();
         }
       } else {
@@ -117,4 +124,16 @@ ipcMain.on('download_eml', (events, files) => {
       }
     })
   })
+});
+
+ipcMain.on('read_unread', (events, etiquettes) => {
+  let uid = etiquettes.uid
+  delete etiquettes.uid;
+  db.db_update_etiquettes(uid, JSON.stringify(etiquettes));
+});
+
+ipcMain.on('flag_unflagged', (events, etiquettes) => {
+  let uid = etiquettes.uid
+  delete etiquettes.uid;
+  db.db_update_etiquettes(uid, JSON.stringify(etiquettes));
 });
