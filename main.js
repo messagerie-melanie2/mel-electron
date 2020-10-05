@@ -1,9 +1,10 @@
 const { app, BrowserWindow } = require('electron')
+const { dialog } = require('electron')
 const path = require('path')
 const glob = require('glob')
 const fs = require('fs')
 
-// require('dotenv').config({path:path.join(process.resourcesPath, '.env')})
+// require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
 require('dotenv').config()
 
 process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive')
@@ -29,7 +30,17 @@ function initialize() {
     }
 
     mainWindow = new BrowserWindow(WindowOptions);
-    mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD })
+
+    try {
+      mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD })
+    }
+    catch {
+      dialog.showMessageBox(null, {
+        type: 'error',
+        title: 'Erreur',
+        message: "Erreur lors du chargement de Mél",
+      });
+    }
     mainWindow.maximize()
 
     mainWindow.on('closed', () => {
