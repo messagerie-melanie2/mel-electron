@@ -8,6 +8,7 @@ require('dotenv').config()
 
 process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive')
 process.env.PATH_DB = path.join(app.getPath("userData"), 'archivage_mails.db');
+process.env.PATH_LISTE_ARCHIVE = path.join(process.env.PATH_ARCHIVE, 'liste_archivage.json')
 
 let mainWindow = null
 app.commandLine.appendSwitch('ignore-certificate-errors')
@@ -30,6 +31,13 @@ function initialize() {
     mainWindow = new BrowserWindow(WindowOptions);
     mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD })
     mainWindow.maximize()
+
+    // Prevent Closing when work is running
+    mainWindow.onbeforeunload = (e) => {
+      var answer = confirm('Do you really want to close the application?');
+      e.returnValue = answer;  // this will *prevent* the closing no matter what value is passed
+      if (answer) { win.destroy(); }  // this will close the app
+    };
 
     mainWindow.on('closed', () => {
       mainWindow = null

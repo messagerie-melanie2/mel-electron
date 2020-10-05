@@ -60,7 +60,6 @@ ipcMain.on('mail_select', (event, uid) => {
 
 // Envoi la pièce jointe sélectionné au plugin electron
 ipcMain.on('attachment_select', (event, value) => {
-
   db.db_attachment_select(value).then((row) => {
     let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
 
@@ -78,52 +77,64 @@ ipcMain.on('attachment_select', (event, value) => {
         });
       })
   })
-
 })
 
 
 // Téléchargement des mails avec le plugin mel_archivage 
 ipcMain.on('download_eml', (events, files) => {
-  let copy_files = [...files];
-  events.sender.send('download-advancement', { "length": files.length });
-  let path_folder;
-  if (files.length > 0) {
-    let file = files.pop();
-    path_folder = functions.createFolderIfNotExist(file.mbox)
-    download(events.sender, path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
-  }
-  else {
-    console.log('Dossier vide');
-  }
+  //On récupère le token pour le téléchargement des mails
+  let token = (files.token) ? files.token : files[Object.keys(files)[0]].token;
 
-  session.defaultSession.on('will-download', (event, item, webContents) => {
-    item.on('done', (event, state) => {
-      if (state === 'completed') {
-        let uid = new URLSearchParams(item.getURL()).get('_uid');
-        let file = copy_files.find((post) => {
-          if (post.uid == uid) {
-            return true;
+  //Si une liste de téléchargement est envoyée on réécrit dans le fichier, sinon on le lit pour finir l'archivage précédent
+  if (files[Object.keys(files)[0]].url) {
+    fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(files));
+  }
+  if (fs.existsSync(process.env.PATH_LISTE_ARCHIVE)) {
+    //On récupère les données de l'archivage
+    let file_data = JSON.parse(fs.readFileSync(process.env.PATH_LISTE_ARCHIVE))
+    let copy_files = [...file_data];
+
+    events.sender.send('download-advancement', { "length": file_data.length });
+    let path_folder;
+    if (file_data.length > 0) {
+      let file = file_data.pop();
+      path_folder = functions.createFolderIfNotExist(file.mbox)
+      download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+    }
+    else {
+      console.log('Dossier vide');
+    }
+
+    session.defaultSession.on('will-download', (event, item, webContents) => {
+      item.on('done', (event, state) => {
+        if (state === 'completed') {
+          let uid = new URLSearchParams(item.getURL()).get('_uid');
+          let file = copy_files.find((post) => {
+            if (post.uid == uid) {
+              return true;
+            }
+          })
+          functions.traitementColsFile(item.getSavePath()).then(element => {
+            element.etiquettes = JSON.stringify(file.etiquettes);
+            db.db_insert_archive(element);
+          });
+          console.log(file_data.length);
+          events.sender.send('download-advancement', { "length": file_data.length, "uid": file.uid, "mbox": file.mbox });
+          if (file_data.length > 0) {
+            fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
+            let file = file_data.pop();
+            download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
           }
-        })
-        functions.traitementColsFile(item.getSavePath()).then(element => {
-          element.etiquettes = JSON.stringify(file.etiquettes);
-          db.db_insert_archive(element);
-        });
-        console.log(files.length);
-        events.sender.send('download-advancement', { "length": files.length, "uid": file.uid, "mbox": file.mbox });
-        if (files.length > 0) {
-          let file = files.pop();
-          download(events.sender, path.join(process.env.LOAD_PATH, file.url), { directory: path_folder })
+          else {
+            events.sender.send('download-finish');
+            session.defaultSession.removeAllListeners();
+          }
+        } else {
+          console.log(`Téléchargement échoué : ${state}`)
         }
-        else {
-          events.sender.send('download-finish', copy_files);
-          session.defaultSession.removeAllListeners();
-        }
-      } else {
-        console.log(`Téléchargement échoué : ${state}`)
-      }
+      })
     })
-  })
+  }
 });
 
 ipcMain.on('read_unread', (events, etiquettes) => {
