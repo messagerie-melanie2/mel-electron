@@ -7,6 +7,7 @@ const fs = require('fs')
 require('dotenv').config()
 
 process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive')
+process.env.PATH_DB = path.join(app.getPath("userData"), 'archivage_mails.db');
 
 let mainWindow = null
 app.commandLine.appendSwitch('ignore-certificate-errors')

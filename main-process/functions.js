@@ -42,6 +42,14 @@ module.exports = {
     return subfolder.join('/');
   },
 
+  getSubfolderFile(path) {
+    path = path.replace(/\\/g, "/");
+    path = path.split('Mails Archive/');
+    let subfolder = path.pop();
+    subfolder = subfolder.split('/');
+    return subfolder.join('/');
+  },
+
   formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return '0 Bytes';
 

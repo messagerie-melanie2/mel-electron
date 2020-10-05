@@ -47,7 +47,7 @@ ipcMain.on('mail_select', (event, uid) => {
 
       db.db_mail_select(uid).then((row) => {
 
-        let eml = fs.readFileSync(row.path_file, 'utf8');
+        let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
 
         mail.traitementMail(eml).then((mail_content) => {
           let html = mail.constructionMail(mail_content, data, uid);
@@ -62,7 +62,7 @@ ipcMain.on('mail_select', (event, uid) => {
 ipcMain.on('attachment_select', (event, value) => {
 
   db.db_attachment_select(value).then((row) => {
-    let eml = fs.readFileSync(row.path_file, 'utf8');
+    let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
 
     mail.traitementAttachment(eml, value.partid)
       .then((result) => {
