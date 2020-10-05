@@ -92,18 +92,19 @@ ipcMain.on('download_eml', (events, files) => {
   if (fs.existsSync(process.env.PATH_LISTE_ARCHIVE)) {
     //On récupère les données de l'archivage
     let file_data = JSON.parse(fs.readFileSync(process.env.PATH_LISTE_ARCHIVE))
+    console.log(file_data);
     let copy_files = [...file_data];
-
-    events.sender.send('download-advancement', { "length": file_data.length });
     let path_folder;
     if (file_data.length > 0) {
+      events.sender.send('download-advancement', { "length": file_data.length });
       let file = file_data.pop();
       path_folder = functions.createFolderIfNotExist(file.mbox)
       download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
     }
     else {
-      console.log('Dossier vide');
+      events.sender.send('download-finish');
     }
+
 
     session.defaultSession.on('will-download', (event, item, webContents) => {
       item.on('done', (event, state) => {
@@ -126,6 +127,7 @@ ipcMain.on('download_eml', (events, files) => {
             download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
           }
           else {
+            // fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
             events.sender.send('download-finish');
             session.defaultSession.removeAllListeners();
           }
