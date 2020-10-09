@@ -79,6 +79,11 @@ ipcMain.on('attachment_select', (event, value) => {
   })
 })
 
+//Arrêt de l'archivage avec le plugin mel_electron
+ipcMain.on('stop-archivage', (events, data) => {
+  process.env.ARRET_ARCHIVAGE = 1;
+  console.log(process.env.ARRET_ARCHIVAGE);
+});
 
 // Téléchargement des mails avec le plugin mel_archivage 
 ipcMain.on('download_eml', (events, data) => {
@@ -104,8 +109,6 @@ ipcMain.on('download_eml', (events, data) => {
       else {
         events.sender.send('download-finish');
       }
-
-
       session.defaultSession.on('will-download', (event, item, webContents) => {
         item.on('done', (event, state) => {
           if (state === 'completed') {
@@ -122,9 +125,18 @@ ipcMain.on('download_eml', (events, data) => {
             console.log(file_data.length);
             events.sender.send('download-advancement', { "length": file_data.length, "uid": file.uid, "mbox": file.mbox });
             if (file_data.length > 0) {
-              fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
-              let file = file_data.pop();
-              download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+              //Si on arrête l'archivage
+              if (process.env.ARRET_ARCHIVAGE) {
+                fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, '[]');
+                file_data = [];
+                process.env.ARRET_ARCHIVAGE = 0;
+                events.sender.send('download-finish');
+              }
+              else {
+                fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
+                let file = file_data.pop();
+                download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+              }
             }
             else {
               fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
