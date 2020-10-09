@@ -81,61 +81,62 @@ ipcMain.on('attachment_select', (event, value) => {
 
 
 // Téléchargement des mails avec le plugin mel_archivage 
-ipcMain.on('download_eml', (events, files) => {
+ipcMain.on('download_eml', (events, data) => {
   //On récupère le token pour le téléchargement des mails
-  let token = (files.token) ? files.token : files[Object.keys(files)[0]].token;
+  let token = data.token;
 
   //Si une liste de téléchargement est envoyée on réécrit dans le fichier, sinon on le lit pour finir l'archivage précédent
-  if (files[Object.keys(files)[0]].url) {
-    fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(files));
+  if (data.files) {
+    fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(data.files));
   }
   if (fs.existsSync(process.env.PATH_LISTE_ARCHIVE)) {
     //On récupère les données de l'archivage
     let file_data = JSON.parse(fs.readFileSync(process.env.PATH_LISTE_ARCHIVE))
-    console.log(file_data);
-    let copy_files = [...file_data];
-    let path_folder;
     if (file_data.length > 0) {
-      events.sender.send('download-advancement', { "length": file_data.length });
-      let file = file_data.pop();
-      path_folder = functions.createFolderIfNotExist(file.mbox)
-      download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
-    }
-    else {
-      events.sender.send('download-finish');
-    }
+      let copy_files = [...file_data];
+      let path_folder;
+      if (file_data.length > 0) {
+        events.sender.send('download-advancement', { "length": file_data.length });
+        let file = file_data.pop();
+        path_folder = functions.createFolderIfNotExist(file.mbox)
+        download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+      }
+      else {
+        events.sender.send('download-finish');
+      }
 
 
-    session.defaultSession.on('will-download', (event, item, webContents) => {
-      item.on('done', (event, state) => {
-        if (state === 'completed') {
-          let uid = new URLSearchParams(item.getURL()).get('_uid');
-          let file = copy_files.find((post) => {
-            if (post.uid == uid) {
-              return true;
+      session.defaultSession.on('will-download', (event, item, webContents) => {
+        item.on('done', (event, state) => {
+          if (state === 'completed') {
+            let uid = new URLSearchParams(item.getURL()).get('_uid');
+            let file = copy_files.find((post) => {
+              if (post.uid == uid) {
+                return true;
+              }
+            })
+            functions.traitementColsFile(item.getSavePath()).then(element => {
+              element.etiquettes = JSON.stringify(file.etiquettes);
+              db.db_insert_archive(element);
+            });
+            console.log(file_data.length);
+            events.sender.send('download-advancement', { "length": file_data.length, "uid": file.uid, "mbox": file.mbox });
+            if (file_data.length > 0) {
+              fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
+              let file = file_data.pop();
+              download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
             }
-          })
-          functions.traitementColsFile(item.getSavePath()).then(element => {
-            element.etiquettes = JSON.stringify(file.etiquettes);
-            db.db_insert_archive(element);
-          });
-          console.log(file_data.length);
-          events.sender.send('download-advancement', { "length": file_data.length, "uid": file.uid, "mbox": file.mbox });
-          if (file_data.length > 0) {
-            fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
-            let file = file_data.pop();
-            download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+            else {
+              fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
+              events.sender.send('download-finish');
+              session.defaultSession.removeAllListeners();
+            }
+          } else {
+            console.log(`Téléchargement échoué : ${state}`)
           }
-          else {
-            // fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
-            events.sender.send('download-finish');
-            session.defaultSession.removeAllListeners();
-          }
-        } else {
-          console.log(`Téléchargement échoué : ${state}`)
-        }
+        })
       })
-    })
+    }
   }
 });
 
