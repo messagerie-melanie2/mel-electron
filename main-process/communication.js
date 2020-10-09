@@ -79,10 +79,10 @@ ipcMain.on('attachment_select', (event, value) => {
   })
 })
 
+ARRET_ARCHIVAGE = 0;
 //Arrêt de l'archivage avec le plugin mel_electron
 ipcMain.on('stop-archivage', (events, data) => {
-  process.env.ARRET_ARCHIVAGE = 1;
-  console.log(process.env.ARRET_ARCHIVAGE);
+  ARRET_ARCHIVAGE = 1;
 });
 
 // Téléchargement des mails avec le plugin mel_archivage 
@@ -126,11 +126,12 @@ ipcMain.on('download_eml', (events, data) => {
             events.sender.send('download-advancement', { "length": file_data.length, "uid": file.uid, "mbox": file.mbox });
             if (file_data.length > 0) {
               //Si on arrête l'archivage
-              if (process.env.ARRET_ARCHIVAGE) {
-                fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, '[]');
+              if (ARRET_ARCHIVAGE != 0) {
+                ARRET_ARCHIVAGE = 0;
                 file_data = [];
-                process.env.ARRET_ARCHIVAGE = 0;
+                fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
                 events.sender.send('download-finish');
+                session.defaultSession.removeAllListeners();
               }
               else {
                 fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
