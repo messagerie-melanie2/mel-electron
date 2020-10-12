@@ -122,7 +122,6 @@ ipcMain.on('download_eml', (events, data) => {
               element.etiquettes = JSON.stringify(file.etiquettes);
               db.db_insert_archive(element);
             });
-            console.log(file_data.length);
             events.sender.send('download-advancement', { "length": file_data.length, "uid": file.uid, "mbox": file.mbox });
             if (file_data.length > 0) {
               //Si on arrête l'archivage
