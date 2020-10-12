@@ -105,5 +105,14 @@ module.exports = {
       db.close()
     }
     catch (err) { console.log(err) }
-  }
+  },
+
+  db_delete_selected_mail(uid) {
+    try {
+      const db = new sqlite3.Database(process.env.PATH_DB);
+      db.run("DELETE FROM cols WHERE id = ?", uid);
+      db.close()
+    }
+    catch (err) { console.log(err) }
+  },
 }

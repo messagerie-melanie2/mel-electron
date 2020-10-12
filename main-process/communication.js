@@ -153,6 +153,10 @@ ipcMain.on('download_eml', (events, data) => {
   }
 });
 
+ipcMain.on('delete_selected_mail', (events, uid) => {
+  db.db_delete_selected_mail(uid);
+})
+
 ipcMain.on('read_unread', (events, etiquettes) => {
   let uid = etiquettes.uid
   delete etiquettes.uid;
