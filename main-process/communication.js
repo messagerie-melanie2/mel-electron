@@ -79,10 +79,10 @@ ipcMain.on('attachment_select', (event, value) => {
   })
 })
 
-ARRET_ARCHIVAGE = 0;
+process.env.ARRET_ARCHIVAGE = 0;
 //Arrêt de l'archivage avec le plugin mel_electron
 ipcMain.on('stop-archivage', (events, data) => {
-  ARRET_ARCHIVAGE = 1;
+  process.env.ARRET_ARCHIVAGE = 1;
 });
 
 // Téléchargement des mails avec le plugin mel_archivage 
@@ -103,8 +103,12 @@ ipcMain.on('download_eml', (events, data) => {
       if (file_data.length > 0) {
         events.sender.send('download-advancement', { "length": file_data.length });
         let file = file_data.pop();
-        path_folder = functions.createFolderIfNotExist(file.mbox)
-        download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+        path_folder = functions.createFolderIfNotExist(file.path_folder)
+        try {
+          download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+        } catch (error) {
+          console.log('Erreur de téléchargement');
+        }
       }
       else {
         events.sender.send('download-finish');
@@ -125,8 +129,8 @@ ipcMain.on('download_eml', (events, data) => {
             events.sender.send('download-advancement', { "length": file_data.length, "uid": file.uid, "mbox": file.mbox });
             if (file_data.length > 0) {
               //Si on arrête l'archivage
-              if (ARRET_ARCHIVAGE != 0) {
-                ARRET_ARCHIVAGE = 0;
+              if (process.env.ARRET_ARCHIVAGE != 0) {
+                process.env.ARRET_ARCHIVAGE = 0;
                 file_data = [];
                 fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
                 events.sender.send('download-finish');
@@ -135,7 +139,11 @@ ipcMain.on('download_eml', (events, data) => {
               else {
                 fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
                 let file = file_data.pop();
-                download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+                try {
+                  download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+                } catch (error) {
+                  console.log('Erreur de téléchargement');
+                }
               }
             }
             else {
