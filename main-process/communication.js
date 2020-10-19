@@ -12,7 +12,7 @@ ipcMain.on('get_archive_folder', (event, msg) => {
   event.sender.send('archive_folder', process.env.ARCHIVE_FOLDER);
 });
 
-// Envoi la liste des sous-dossier dans le dossier 'Mails archive' au plugin electron  
+// Envoi la liste des sous-dossier dans le dossier 'Mails archive'
 ipcMain.on('subfolder', (event, msg) => {
   const options = {
     extensions: []
@@ -28,14 +28,14 @@ ipcMain.on('search_list', (event, search_request) => {
   })
 });
 
-// Envoi la liste des mails d'un dossier au plugin electron  
+// Envoi la liste des mails d'un dossier
 ipcMain.on('read_mail_dir', (event, path) => {
   db.db_read_mail_dir(path).then((value) => {
     event.sender.send('mail_dir', value)
   });
 })
 
-// Envoi le mail sélectionné au plugin electron 
+// Envoi le mail sélectionné au format html 
 ipcMain.on('mail_select', (event, uid) => {
   if (uid != null) {
     const template = (process.env.DEV_MODE == "Dev") ? 'template/messagepreview.html' : path.join(process.resourcesPath, 'template/messagepreview.html');
@@ -58,7 +58,19 @@ ipcMain.on('mail_select', (event, uid) => {
   }
 });
 
-// Envoi la pièce jointe sélectionné au plugin electron
+// Envoi l'eml du mail dont l'id est passé en paramètre
+ipcMain.on('eml_read', (event, uid) => {
+  if (uid != null) {
+    db.db_mail_select(uid).then((row) => {
+
+      let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
+
+      event.sender.send('eml_return', eml);
+    });
+  }
+});
+
+// Envoi la pièce jointe sélectionné
 ipcMain.on('attachment_select', (event, value) => {
   db.db_attachment_select(value).then((row) => {
     let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
@@ -160,8 +172,16 @@ ipcMain.on('download_eml', (events, data) => {
   }
 });
 
-ipcMain.on('delete_selected_mail', (events, uid) => {
-  db.db_delete_selected_mail(uid);
+ipcMain.on('delete_selected_mail', (events, uids) => {
+  try {
+    db.db_get_path(uids).then((rows) => {
+      rows.forEach(row => {
+        fs.unlinkSync(path.join(process.env.PATH_ARCHIVE, row.path_file));
+        db.db_delete_selected_mail(row.id);
+      });
+    })
+  }
+  catch (err) { console.log(err) }
 })
 
 ipcMain.on('read_unread', (events, etiquettes) => {

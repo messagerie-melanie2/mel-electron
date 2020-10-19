@@ -20,14 +20,15 @@ module.exports = {
       return new Promise((resolve, reject) => {
         db.all("SELECT * FROM cols WHERE break != 1 AND subject LIKE '%" + search_request.value + "%' AND subfolder = '" + search_request.subfolder + "' ORDER BY date DESC", (err, rows) => {
           if (err) {
+            db.close();
             reject(err)
           }
           else {
+            db.close();
             resolve(rows)
           }
         });
       })
-      db.close();
     }
     catch (err) { console.log(err) }
   },
@@ -38,14 +39,15 @@ module.exports = {
       return new Promise((resolve, reject) => {
         db.all("SELECT * FROM cols WHERE break != 1 AND subfolder = '" + file_path + "' ORDER BY date DESC", (err, rows) => {
           if (err) {
+            db.close();
             reject(err)
           }
           else {
+            db.close();
             resolve(rows)
           }
         });
       })
-      db.close()
     }
     catch (err) { console.log(err) }
   },
@@ -56,14 +58,15 @@ module.exports = {
       return new Promise((resolve, reject) => {
         db.get("SELECT path_file FROM cols WHERE id = ?", uid, (err, row) => {
           if (err) {
+            db.close();
             reject(err)
           }
           else {
+            db.close();
             resolve(row)
           }
         });
       })
-      db.close();
     }
     catch (err) { console.log(err) }
   },
@@ -74,14 +77,15 @@ module.exports = {
         const db = new sqlite3.Database(process.env.PATH_DB);
         db.get("SELECT path_file FROM cols WHERE id = ?", value.uid, (err, row) => {
           if (err) {
+            db.close()
             reject(err)
           }
           else {
+            db.close()
             resolve(row)
           }
         });
       })
-      db.close()
     }
     catch (err) { console.log(err) }
   },
@@ -110,8 +114,25 @@ module.exports = {
   db_delete_selected_mail(uid) {
     try {
       const db = new sqlite3.Database(process.env.PATH_DB);
-      db.run("DELETE FROM cols WHERE id = ?", uid);
+      db.run(`DELETE FROM cols WHERE id = ?`, uid);
       db.close()
+    }
+    catch (err) { console.log(err) }
+  },
+
+  db_get_path(uids) {
+    try {
+      return new Promise((resolve, reject) => {
+        const db = new sqlite3.Database(process.env.PATH_DB);
+        db.all('SELECT id, path_file FROM cols WHERE id IN ( ' + uids.map(function(){ return '?' }).join(',') + ' )', uids, (err, row) => {
+          if (err) {
+            reject(err)
+          }
+          else {
+            resolve(row)
+          }
+        });
+      })
     }
     catch (err) { console.log(err) }
   },
