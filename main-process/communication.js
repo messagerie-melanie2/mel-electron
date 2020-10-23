@@ -46,13 +46,14 @@ ipcMain.on('mail_select', (event, uid) => {
       }
 
       db.db_mail_select(uid).then((row) => {
-
-        let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
-
-        mail.traitementMail(eml).then((mail_content) => {
-          let html = mail.constructionMail(mail_content, data, uid);
-          event.sender.send('mail_return', html);
-        })
+        try {
+          let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
+          mail.traitementMail(eml).then((mail_content) => {
+            let html = mail.constructionMail(mail_content, data, uid);
+            event.sender.send('mail_return', html);
+          })
+        }
+        catch (err) { console.log(err); }
       });
     })
   }
