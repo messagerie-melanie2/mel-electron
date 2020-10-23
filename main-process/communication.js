@@ -63,10 +63,8 @@ ipcMain.on('mail_select', (event, uid) => {
 ipcMain.on('eml_read', (event, uid) => {
   if (uid != null) {
     db.db_mail_select(uid).then((row) => {
-
       let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
-
-      event.sender.send('eml_return', eml);
+      event.sender.send('eml_return', { "text": eml, "uid": uid });
     });
   }
 });
@@ -177,7 +175,9 @@ ipcMain.on('delete_selected_mail', (events, uids) => {
   try {
     db.db_get_path(uids).then((rows) => {
       rows.forEach(row => {
-        fs.unlinkSync(path.join(process.env.PATH_ARCHIVE, row.path_file));
+        try {
+          fs.unlinkSync(path.join(process.env.PATH_ARCHIVE, row.path_file));
+        } catch (error) { console.log('Erreur de suppression du fichier : ' + row.path_file); }
         db.db_delete_selected_mail(row.id);
       });
     })
