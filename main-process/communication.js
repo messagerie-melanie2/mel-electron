@@ -60,11 +60,11 @@ ipcMain.on('mail_select', (event, uid) => {
 });
 
 // Envoi l'eml du mail dont l'id est passé en paramètre
-ipcMain.on('eml_read', (event, uid) => {
-  if (uid != null) {
-    db.db_mail_select(uid).then((row) => {
+ipcMain.on('eml_read', (event, data) => {
+  if (data.uid != null) {
+    db.db_mail_select(data.uid).then((row) => {
       let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
-      event.sender.send('eml_return', { "text": eml, "uid": uid });
+      event.sender.send('eml_return', { "text": eml, "uid": data.uid, "folder": data.folder });
     });
   }
 });
