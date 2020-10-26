@@ -4,8 +4,8 @@ const path = require('path')
 const glob = require('glob')
 const fs = require('fs')
 
-// require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
-require('dotenv').config()
+require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
+// require('dotenv').config()
 
 process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive')
 process.env.PATH_DB = path.join(app.getPath("userData"), 'archivage_mails.db');
