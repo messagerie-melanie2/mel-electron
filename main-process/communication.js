@@ -1,4 +1,4 @@
-const { app, dialog, ipcMain, shell, BrowserWindow, session } = require('electron');
+const { app, dialog, ipcMain, shell, session } = require('electron');
 const { download } = require("electron-dl");
 const functions = require('./functions.js');
 const db = require('./database.js');
@@ -40,7 +40,7 @@ ipcMain.on('read_mail_dir', (event, path) => {
 
 // Envoi le mail sélectionné au format html 
 ipcMain.on('mail_select', (event, uid) => {
-  if (uid != null) {
+  if (uid.length > 0) {
     const template = (process.env.DEV_MODE == "Dev") ? 'template/messagepreview.html' : path.join(process.resourcesPath, 'template/messagepreview.html');
     fs.readFile(template, (err, data) => {
       if (err) {
@@ -67,7 +67,6 @@ ipcMain.on('eml_read', (event, data) => {
   if (data.uid != null) {
     db.db_mail_select(data.uid).then((row) => {
       let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
-      console.log(eml);
       event.sender.send('eml_return', { "text": eml, "uid": data.uid, "folder": data.folder });
     });
   }

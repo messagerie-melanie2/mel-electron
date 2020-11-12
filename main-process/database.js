@@ -1,6 +1,5 @@
-const { app, BrowserWindow } = require('electron');
+const { BrowserWindow } = require('electron');
 const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
 const functions = require('./functions.js');
 const log4js = require("log4js");
 const logger = log4js.getLogger("database");
