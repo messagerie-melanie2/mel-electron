@@ -55,6 +55,7 @@
     "electron-dl": "^3.0.2",
     "glob": "^7.1.6",
     "jquery": "^3.5.0",
+    "log4js": "^6.3.0",
     "mailparser": "^2.8.1",
     "sqlite3": "^5.0.0",
     "underscore": "^1.10.2",

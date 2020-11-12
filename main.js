@@ -3,6 +3,21 @@ const { dialog } = require('electron')
 const path = require('path')
 const glob = require('glob')
 const fs = require('fs')
+const log4js = require("log4js");
+const logger = log4js.getLogger("main");
+
+log4js.configure({
+  appenders: {
+    everything: { type: 'file', filename: 'logs/logs.log', maxLogSize: 10485760, backups: 3, compress: true }
+  },
+  categories: {
+    default: { appenders: ['everything'], level: 'debug' }
+  }
+});
+
+logger.info("Démarrage de l'application")
+
+
 
 // require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
 require('dotenv').config()
@@ -44,6 +59,8 @@ function initialize() {
     mainWindow.maximize()
 
     mainWindow.on('closed', () => {
+      logger.info("Arrêt de l'application")
+      log4js.shutdown
       mainWindow = null
     })
   }

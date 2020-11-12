@@ -3,16 +3,20 @@ const mail = require('./mail.js');
 const utf7 = require('utf7').imap;
 const path = require('path');
 const fs = require('fs');
+const log4js = require("log4js");
+const logger = log4js.getLogger("functions");
 
 module.exports = {
   createFolderIfNotExist(mbox) {
-    mbox = utf7.decode(mbox);
-    let path_folder = path.join(process.env.PATH_ARCHIVE, mbox);
-    if (!fs.existsSync(path_folder)) {
-      fs.mkdirSync(path_folder, { recursive: true });
-      BrowserWindow.getAllWindows()[0].send('new_folder');
-    }
-    return path_folder;
+    try {
+      mbox = utf7.decode(mbox);
+      let path_folder = path.join(process.env.PATH_ARCHIVE, mbox);
+      if (!fs.existsSync(path_folder)) {
+        fs.mkdirSync(path_folder, { recursive: true });
+        BrowserWindow.getAllWindows()[0].send('new_folder');
+      }
+      return path_folder;
+    } catch (err) { logger.error(err) }
   },
 
   traitementColsFile(file) {
@@ -20,16 +24,14 @@ module.exports = {
       try {
         new Promise((resolve) => {
           fs.readFile(file, 'utf8', (err, eml) => {
-            if (err) console.log(err);
+            if (err) logger.error(err);
             resolve(eml);
           });
         }).then((eml) => {
           resolve(mail.traitementCols(eml, file));
         })
       }
-      catch (err) {
-        console.error(err);
-      }
+      catch (err) { logger.error(err) }
     });
   },
 
