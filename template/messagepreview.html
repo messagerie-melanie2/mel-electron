@@ -173,7 +173,7 @@
     
     <div id="contactphoto"><img src="./?_task=addressbook&amp;_action=photo&amp;_email=Steam+Support" alt="Photo du contact" onerror="this.src = 'program/resources/blank.gif'"></div>
     
-    <span class="from"><span class="voice">De: </span><span class="adr">%%FROM_NAME%%</span></span>
+    <span class="from"><span class="voice">De: </span><span class="adr" title="%%FROM%%">%%FROM_NAME%%</span></span>
     
     <table id="preview-allheaders" class="headers-table"><tbody><tr><td class="header-title">À</td>
     <td class="header to"><span class="adr"><a href="mailto:malfoo@gmail.com" class="rcmContactAddress" onclick="return rcmail.command('compose','malfoo@gmail.com',this)" title="malfoo@gmail.com">malfoo@gmail.com</a><a href="#add" title="Ajouter au carnet d'adresses" class="rcmaddcontact" onclick="return rcmail.command('add-contact','malfoo@gmail.com',this)"><img src="skins/mel_larry/images/addcontact.png" alt="Add contact" class="noselect"></a></span></td>
@@ -196,8 +196,8 @@
     <div class="leftcol" role="region" aria-labelledby="aria-label-messagebody" style="margin-right: 0px;">
     <h2 id="aria-label-messagebody" class="voice">Corps du courriel</h2>
     <div id="message-objects">
-    </div>
-    
+      <div id="remote-objects-message" class="notice" style="display: none">Pour protéger votre confidentialité, les images distantes sont bloquées dans ce courriel.&nbsp;<a href="#loadimages" onclick="rcmail.command('load-images')" class="button">Afficher les images</a></div>
+      </div>
     <div id="messagebody"><div class="message-htmlpart" id="message-htmlpart1"><div class="rcmBody"><p>%%OBJECT%%</p></div></div>
     </div>
     

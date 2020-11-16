@@ -101,6 +101,7 @@ ipcMain.on('stop-archivage', (events, data) => {
 
 // Téléchargement des mails avec le plugin mel_archivage 
 ipcMain.on('download_eml', (events, data) => {
+  console.log(data);
   //On récupère le token pour le téléchargement des mails
   let token = data.token;
 
