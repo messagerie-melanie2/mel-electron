@@ -1,5 +1,4 @@
-const { app, BrowserWindow } = require('electron')
-const { dialog } = require('electron')
+const { app, BrowserWindow, dialog } = require('electron')
 const path = require('path')
 const glob = require('glob')
 const fs = require('fs')
