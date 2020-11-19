@@ -5,7 +5,8 @@
   <link rel="stylesheet" type="text/css" href="skins/larry/styles.min.css?s=1604052541">
   <link rel="stylesheet" type="text/css" href="skins/larry/mail.min.css?s=1604052541">
   <link rel="stylesheet" type="text/css" href="plugins/jqueryui/themes/larry/jquery-ui.css?s=1604052512">
-  <link rel="stylesheet" type="text/css" href="plugins/mel_archivage/skins/mel_larry/css/mel_archivage.css?s=1604054082">
+  <link rel="stylesheet" type="text/css"
+    href="plugins/mel_archivage/skins/mel_larry/css/mel_archivage.css?s=1604054082">
   <link rel="stylesheet" type="text/css" href="plugins/electron/skins/mel_larry/css/electron.css?s=1604054099">
   <link rel="stylesheet" type="text/css" href="plugins/mel_larry/css/themes.min.css?s=1604052518">
   <link rel="stylesheet" type="text/css" href="plugins/mel_larry/css/styles.css?s=1604052518">
@@ -13,15 +14,23 @@
   <link rel="stylesheet" type="text/css" href="plugins/mel_larry/css/mail.min.css?s=1604052518">
   <link rel="stylesheet" type="text/css" href="plugins/mel_larry/css/jqueryui.min.css?s=1604052518">
   <script type="text/javascript" src="skins/larry/ui.min.js?s=1604052541"></script>
-  
-  
-  
+
+
+
   <style type="text/css">
-  
-    #mailview-top { height: 270px; }
-    #mailview-bottom { top: 284px; height: auto; display: block; }
-    #mailpreviewframe { display: block; }
-  
+    #mailview-top {
+      height: 270px;
+    }
+
+    #mailview-bottom {
+      top: 284px;
+      height: auto;
+      display: block;
+    }
+
+    #mailpreviewframe {
+      display: block;
+    }
   </style>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <script src="program/js/jquery.min.js?s=1604052531" type="text/javascript"></script>
@@ -30,188 +39,239 @@
   <script src="program/js/treelist.min.js?s=1604052531" type="text/javascript"></script>
   <script src="program/js/list.min.js?s=1604052531" type="text/javascript"></script>
   <script type="text/javascript">
-  
-  /*
-          @licstart  The following is the entire license notice for the 
-          JavaScript code in this page.
-  
-          Copyright (C) 2005-2014 The Roundcube Dev Team
-  
-          The JavaScript code in this page is free software: you can redistribute
-          it and/or modify it under the terms of the GNU General Public License
-          as published by the Free Software Foundation, either version 3 of
-          the License, or (at your option) any later version.
-  
-          The code is distributed WITHOUT ANY WARRANTY; without even the implied
-          warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-          See the GNU GPL for more details.
-  
-          @licend  The above is the entire license notice
-          for the JavaScript code in this page.
-  */
-  var rcmail = new rcube_webmail();
-  rcmail.set_env({"task":"mail","standard_windows":false,"locale":"fr_FR","devel_mode":null,"cookie_domain":"","cookie_path":"\/","cookie_secure":false,"skin":"mel_larry","refresh_interval":60,"session_lifetime":600,"action":"","comm_path":".\/?_task=mail","user_id":"R32JNoICsDa3XAr7","compose_extwin":false,"date_format":"yy-mm-dd","archive_folder":"Messages archiv&AOk-s","iselectron":true,"username":"malfoo@gmail.com","plugins":["jqueryui","userinfo","zipdownload","mel_archivage","electron","mel_larry"],"browser_capabilities":{"pdf":"1","flash":"0","tiff":"0","webp":"1"},"search_mods":{"*":{"subject":1,"from":1},"[Gmail]\/Messages envoy&AOk-s":{"subject":1,"to":1},"[Gmail]\/Brouillons":{"subject":1,"to":1},"INBOX":{"subject":1,"from":1}},"mailbox":"INBOX","pagesize":50,"current_page":1,"delimiter":"\/","threading":false,"threads":false,"reply_all_mode":0,"layout":"widescreen","quota":true,"drafts_mailbox":"[Gmail]\/Brouillons","trash_mailbox":"[Gmail]\/Corbeille","junk_mailbox":"[Gmail]\/Spam","read_when_deleted":true,"display_next":true,"unreadwrap":"%s","collapsed_folders":"","mailboxes":{"INBOX":{"id":"INBOX","name":"Bo\u00eete de r\u00e9ception","virtual":false,"class":"inbox"},"[Gmail]":{"id":"[Gmail]","name":"[Gmail]","virtual":true},"[Gmail]\/Brouillons":{"id":"[Gmail]\/Brouillons","name":"Brouillons","virtual":false,"class":"drafts"},"[Gmail]\/Messages envoy&AOk-s":{"id":"[Gmail]\/Messages envoy&AOk-s","name":"Envoy\u00e9s","virtual":false,"class":"sent"},"[Gmail]\/Spam":{"id":"[Gmail]\/Spam","name":"Pourriels","virtual":false,"class":"junk"},"[Gmail]\/Corbeille":{"id":"[Gmail]\/Corbeille","name":"Corbeille","virtual":false,"class":"trash"},"[Gmail]\/Important":{"id":"[Gmail]\/Important","name":"Important","virtual":false},"[Gmail]\/Suivis":{"id":"[Gmail]\/Suivis","name":"Suivis","virtual":false},"[Gmail]\/Tous les messages":{"id":"[Gmail]\/Tous les messages","name":"Tous les messages","virtual":false},"Notes":{"id":"Notes","name":"Notes","virtual":false},"Personnel":{"id":"Personnel","name":"Personnel","virtual":false},"Professionnel":{"id":"Professionnel","name":"Professionnel","virtual":false},"Re&AOc-us":{"id":"Re&AOc-us","name":"Re\u00e7us","virtual":false}},"mailboxes_list":["INBOX","[Gmail]","[Gmail]\/Brouillons","[Gmail]\/Messages envoy&AOk-s","[Gmail]\/Spam","[Gmail]\/Corbeille","[Gmail]\/Important","[Gmail]\/Suivis","[Gmail]\/Tous les messages","Notes","Personnel","Professionnel","Re&AOc-us"],"col_movable":true,"autoexpand_threads":0,"sort_col":"","sort_order":"DESC","messages":[],"listcols":["subject","fromto","date","flag","attachment"],"disabled_sort_col":false,"disabled_sort_order":false,"coltypes":{"threads":{"className":"threads","id":"rcmthreads","label":"","sortable":false},"subject":{"className":"subject","id":"rcmsubject","label":"Objet","sortable":true},"fromto":{"className":"fromto","id":"rcmfromto","label":"De","sortable":true},"date":{"className":"date","id":"rcmdate","label":"Date","sortable":true},"flag":{"className":"flag","id":"rcmflag","label":"","sortable":false},"attachment":{"className":"attachment","id":"rcmattachment","label":"","sortable":false}},"contentframe":"messagecontframe","blankpage":"skins\/mel_larry\/watermark.html","max_filesize":2097152,"filesizeerror":"Le fichier t\u00e9l\u00e9vers\u00e9 d\u00e9passe la taille maximale de 2.0 Mo.","max_filecount":"20","filecounterror":"Vous pouvez t\u00e9l\u00e9verser un maximum de 20 fichiers \u00e0 la fois.","request_token":"3MI8xmf8R7ohC653hgq0aJLPTALD91vu"});
-  rcmail.add_label({"loading":"Chargement...","servererror":"Erreur de serveur !","connerror":"Erreur de connexion (n'a pu atteindre le serveur) !","requesttimedout":"D\u00e9lai de la requ\u00eate expir\u00e9","refreshing":"Actualisation...","windowopenerror":"La fen\u00eatre contextuelle a \u00e9t\u00e9 bloqu\u00e9e !","uploadingmany":"T\u00e9l\u00e9versement des fichiers...","close":"Fermer","mel_archivage.null":" ","mel_archivage.title":"Archiver les courriels de ce dossier","mel_archivage.archive":"Archiver","mel_archivage.date":"Soit jusqu'au : ","mel_archivage.nb_jours":"Messages de plus de  : ","mel_archivage.jours":"jours","mel_archivage.buttontext":"Archiver","mel_archivage.buttontitle":"Archiver ce courriel","mel_archivage.description":"Comment fonctionne l'archivage : S\u00e9lectionnez un nombre de jours ou une date, tous les messages du dossier s\u00e9lectionn\u00e9 ant\u00e9rieurs \u00e0 cette date seront t\u00e9l\u00e9charg\u00e9s sur votre poste. Ces messages ne seront pas supprim\u00e9s de votre messagerie mais d\u00e9plac\u00e9s dans un dossier Messages archiv\u00e9s. Une fois que l'archive t\u00e9l\u00e9charg\u00e9e vous convient, vous pouvez supprimer les messages contenus dans Messages archiv\u00e9s pour lib\u00e9rer de la place.","mel_archivage.generating_archive":"G\u00e9n\u00e9ration de l'archive en cours...","mel_archivage.dont_reload_page":"Ne pas fermer la fen\u00eatre","mel_archivage.archive_generated":"L'archive est g\u00e9n\u00e9r\u00e9e et va \u00eatre t\u00e9l\u00e9charg\u00e9e. La page va se recharger dans quelques instants","mel_archivage.archive_downloading":"L'archive est en cours de t\u00e9l\u00e9chargement. Vous pouvez fermer la fen\u00eatre, les mails continuerons de se t\u00e9l\u00e9charger en arri\u00e8re-plan. Les mails dispara\u00eetrons de la liste apr\u00e8s l'actualisation de la page.","mel_archivage.archive_downloading_finish":"T\u00e9l\u00e9chargement des mails archiv\u00e9s termin\u00e9","mel_archivage.error_no_message":"Il n'y a pas de courriel \u00e0 archiver. Essayer de diminuer le nombre de jours.","mel_archivage.error_bad_folder":"Vous ne pouvez pas archiver ce dossier (c'est d\u00e9j\u00e0 un dossier d'archives)","mel_archivage.error_too_many_messages":"Une erreur s'est produite lors de la g\u00e9n\u00e9ration de l'archive. Essayez de r\u00e9duire le nombre de jours pour diminuer la taille de l'archive.","mel_archivage.INBOX":"boite de reception","mel_archivage.help":"Afficher l'aide","electron.null":" ","electron.title":"Plugin Electron","electron.buttontext":"Electron","electron.buttontitle":"Electron button","mel_larry.control":"Affichage des messages","mel_larry.discussion":"Discussion","mel_larry.search_in":"Rechercher dans","mel_larry.search_in_all_folders":"Rechercher dans tous les dossiers","mel_larry.search_in_all_contacts":"Rechercher dans tous les contacts","mel_larry.search_in_calendars":"Rechercher dans les agendas","mel_larry.search_in_tasks":"Rechercher dans les t\u00e2ches","mel_larry.showcontactstitle":"Ouvrir la fen\u00eatre pour chercher un contact","mel_larry.allcontacts":"Tous les contacts","mel_larry.allannuaires":"Tous les annuaires","mel_larry.personalannuaire":"Annuaire personnel et minist\u00e9riel (M\u00e9l)","mel_larry.foundin":"Trouv\u00e9 dans","mel_larry.personalcalendar":"Agenda personnel","mel_larry.personaladdressbook":"Carnet personnel","mel_larry.personaltasks":"T\u00e2ches personnelles","mel_larry.help":"Aide","checkingmail":"Rel\u00e8ve des nouveaux courriels...","deletemessage":"Supprimer le courriel","movemessagetotrash":"D\u00e9placer le courriel vers la corbeille","movingmessage":"D\u00e9placement des courriels...","copyingmessage":"Copie des courriels...","deletingmessage":"Suppression des courriels...","markingmessage":"Marquage des courriels...","copy":"Copier","move":"D\u00e9placer","quota":"Utilisation du disque","replyall":"R\u00e9pondre \u00e0 tous","replylist":"R\u00e9pondre \u00e0 la liste","stillsearching":"Recherche toujours en cours...","flagged":"Signal\u00e9","unflagged":"Non signal\u00e9","unread":"Non lu","deleted":"Supprim\u00e9","replied":"R\u00e9ponse faite","forwarded":"Transf\u00e9r\u00e9","priority":"Priorit\u00e9","withattachment":"Avec pi\u00e8ce jointe","fileuploaderror":"\u00c9chec lors du t\u00e9l\u00e9versement du fichier","mark":"Marquer","markallread":"Tout marquer comme lu","folders-cur":"Dossier s\u00e9lectionn\u00e9 seulement","folders-sub":"Dossier s\u00e9lectionn\u00e9 et ses sous-dossiers","folders-all":"Tous les dossiers","cancel":"Annuler","errortitle":"Une erreur est survenue !","toggleadvancedoptions":"Activer\/d\u00e9sactiver les options avanc\u00e9es","searching":"Recherche...","purgefolderconfirm":"Voulez-vous vraiment supprimer tous les courriels dans ce dossier ?","deletemessagesconfirm":"Voulez-vous vraiment supprimer les courriels s\u00e9lectionn\u00e9s ?","from":"De","to":"\u00c0","selectimportfile":"Veuillez choisir un fichier \u00e0 t\u00e9l\u00e9verser.","importwait":"Importation, veuillez patienter..."});
-  rcmail.gui_container("taskbar_mel","taskbar");
-  rcmail.gui_container("junkmenu","junkmenu-menu");
-  rcmail.gui_container("forwardmenu","forwardmenu-menu");
-  rcmail.gui_container("replyallmenu","replyallmenu-menu");
-  rcmail.gui_container("folderlistheader-first","folderlistheader-first");
-  rcmail.gui_container("folderlistheader-last","folderlistheader-last");
-  rcmail.gui_container("listcontrols","listcontrols");
-  rcmail.gui_container("mailboxoptions","mailboxoptionsmenu");
-  rcmail.register_button('logout', 'rcmbtn100', 'link', '', 'button-logout active', '');
-  rcmail.register_button('mail', 'rcmbtn101', 'link', '', 'button-mail button-selected', '');
-  rcmail.register_button('addressbook', 'rcmbtn102', 'link', '', 'button-addressbook button-selected', '');
-  rcmail.register_button('calendar', 'rcmbtn103', 'link', '', 'button-calendar button-selected', '');
-  rcmail.register_button('discussion', 'rcmbtn104', 'link', '', 'button-discussion button-selected', '');
-  rcmail.register_button('tasks', 'rcmbtn105', 'link', '', 'button-tasklist button-selected', '');
-  rcmail.register_button('settings', 'rcmbtn106', 'link', '', 'button-settings button-selected', '');
-  rcmail.register_button('logout', 'rcmbtn107', 'link', '', 'button-logout', '');
-  rcmail.register_button('compose', 'rcmbtn108', 'link', 'button compose', 'button compose pressed', '');
-  rcmail.register_button('checkmail', 'rcmbtn109', 'link', 'button checkmail', 'button checkmail pressed', '');
-  rcmail.register_button('move', 'rcmbtn110', 'link', 'button move', 'button move pressed', '');
-  rcmail.register_button('plugin.mel_junk', 'rcmbtn111', 'link', 'button junk', 'button junk pressed', '');
-  rcmail.register_button('plugin.markasjunk', 'rcmbtn112', 'link', 'button junk', 'button junk pressed', '');
-  rcmail.register_button('delete', 'rcmbtn113', 'link', 'button delete', 'button delete pressed', '');
-  rcmail.register_button('reply', 'rcmbtn114', 'link', 'button reply', 'button reply pressed', '');
-  rcmail.register_button('reply-all', 'rcmbtn115', 'link', 'button reply-all', 'button reply-all pressed', '');
-  rcmail.register_button('forward', 'rcmbtn116', 'link', 'button forward', 'button forward pressed', '');
-  rcmail.register_button('plugin.bounce.box', 'rcmbtn117', 'link', 'button bounce', 'button bounce pbuttontextressed', '');
-  rcmail.register_button('plugin.thunderbird_labels.rcm_tb_label_submenu', 'tb_label_popuplink', 'link', 'button thunderbird', 'button thunderbird pressed', '');
-  rcmail.register_button('plugin_archiver', 'rcmbtn118', 'link', 'button archiver', 'button archiver pressed', '');
-  rcmail.register_button('managesieve-create', 'rcmbtn119', 'link', 'button filterlink', 'button filterlink pressed', '');
-  rcmail.register_button('print', 'rcmbtn120', 'link', 'button print', 'button print pressed', '');
-  rcmail.register_button('calendar-create-from-mail', 'rcmbtn121', 'link', 'button calendarlink', 'button calendarlink pressed', '');
-  rcmail.register_button('plugin.markasjunk', 'rcmbtn122', 'link', 'markasjunk active', '', '');
-  rcmail.register_button('plugin.mel_junk_send', 'rcmbtn123', 'link', 'junkadmin active', '', '');
-  rcmail.register_button('forward-inline', 'rcmbtn124', 'link', 'forwardlink active', '', '');
-  rcmail.register_button('forward-attachment', 'rcmbtn125', 'link', 'forwardattachmentlink active', '', '');
-  rcmail.register_button('reply-all', 'rcmbtn126', 'link', 'replyalllink active', '', '');
-  rcmail.register_button('reply-list', 'rcmbtn127', 'link', 'replylistlink active', '', '');
-  rcmail.register_button('download', 'rcmbtn128', 'link', 'icon active', '', '');
-  rcmail.register_button('edit', 'rcmbtn129', 'link', 'icon active', '', '');
-  rcmail.register_button('viewsource', 'rcmbtn130', 'link', 'icon active', '', '');
-  rcmail.register_button('copy', 'rcmbtn131', 'link', 'icon active', '', '');
-  rcmail.register_button('open', 'rcmbtn132', 'link', 'icon active', '', '');
-  rcmail.register_button('mark', 'rcmbtn133', 'link', 'icon active', '', '');
-  rcmail.register_button('mark', 'rcmbtn134', 'link', 'icon active', '', '');
-  rcmail.register_button('mark', 'rcmbtn135', 'link', 'icon active', '', '');
-  rcmail.register_button('mark', 'rcmbtn136', 'link', 'icon active', '', '');
-  rcmail.register_button('menu-open', 'searchmenulink', 'link', '', '', '');
-  rcmail.gui_object('qsearchbox', 'quicksearchbox');
-  rcmail.register_button('reset-search', 'searchreset', 'link', '', '', '');
-  rcmail.gui_object('search_filter', 'messagessearchfilter');
-  rcmail.gui_object('search_interval', 's_interval');
-  rcmail.gui_object('mailboxlist', 'mailboxlist');
-  rcmail.gui_object('quotadisplay', 'quotadisplay');
-  rcmail.gui_object('messagelist', 'messagelist');
-  rcmail.register_button('set-listmode', 'maillistmode', 'link', 'iconbutton listmode', '', '');
-  rcmail.register_button('set-listmode', 'mailthreadmode', 'link', 'iconbutton threadmode', '', '');
-  rcmail.gui_object('countdisplay', 'rcmcountdisplay');
-  rcmail.register_button('firstpage', 'rcmbtn137', 'link', 'button firstpage', 'button firstpage pressed', '');
-  rcmail.register_button('previouspage', 'rcmbtn138', 'link', 'button prevpage', 'button prevpage pressed', '');
-  rcmail.register_button('nextpage', 'rcmbtn139', 'link', 'button nextpage', 'button nextpage pressed', '');
-  rcmail.register_button('lastpage', 'rcmbtn140', 'link', 'button lastpage', 'button lastpage pressed', '');
-  rcmail.register_button('move', 'rcmbtn141', 'link', 'active', '', '');
-  rcmail.register_button('copy', 'rcmbtn142', 'link', 'active', '', '');
-  rcmail.register_button('expunge', 'rcmbtn143', 'link', 'active', '', '');
-  rcmail.register_button('purge', 'rcmbtn144', 'link', 'active', '', '');
-  rcmail.register_button('mark-all-read', 'rcmbtn145', 'link', 'active', '', '');
-  rcmail.register_button('import-messages', 'rcmbtn146', 'link', 'active', '', '');
-  rcmail.register_button('settings.folders', 'rcmbtn147', 'link', 'active', '', '');
-  rcmail.register_button('select-all', 'rcmbtn148', 'link', 'icon active', '', '');
-  rcmail.register_button('select-all', 'rcmbtn149', 'link', 'icon active', '', '');
-  rcmail.register_button('select-all', 'rcmbtn150', 'link', 'icon active', '', '');
-  rcmail.register_button('select-all', 'rcmbtn151', 'link', 'icon active', '', '');
-  rcmail.register_button('select-all', 'rcmbtn152', 'link', 'icon active', '', '');
-  rcmail.register_button('select-none', 'rcmbtn153', 'link', 'icon active', '', '');
-  rcmail.register_button('expand-all', 'rcmbtn154', 'link', 'icon active', '', '');
-  rcmail.register_button('expand-unread', 'rcmbtn155', 'link', 'icon active', '', '');
-  rcmail.register_button('collapse-all', 'rcmbtn156', 'link', 'icon active', '', '');
-  rcmail.register_button('menu-save', 'listmenusave', 'input', '', '', '');
-  rcmail.register_button('menu-close', 'listmenucancel', 'input', '', '', '');
-  rcmail.gui_object('importform', 'uploadformFrm');
-  rcmail.gui_object('message', 'messagestack');
+
+    /*
+            @licstart  The following is the entire license notice for the 
+            JavaScript code in this page.
+    
+            Copyright (C) 2005-2014 The Roundcube Dev Team
+    
+            The JavaScript code in this page is free software: you can redistribute
+            it and/or modify it under the terms of the GNU General Public License
+            as published by the Free Software Foundation, either version 3 of
+            the License, or (at your option) any later version.
+    
+            The code is distributed WITHOUT ANY WARRANTY; without even the implied
+            warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+            See the GNU GPL for more details.
+    
+            @licend  The above is the entire license notice
+            for the JavaScript code in this page.
+    */
+    var rcmail = new rcube_webmail();
+    rcmail.set_env({ "task": "mail", "standard_windows": false, "locale": "fr_FR", "devel_mode": null, "cookie_domain": "", "cookie_path": "\/", "cookie_secure": false, "skin": "mel_larry", "refresh_interval": 60, "session_lifetime": 600, "action": "", "comm_path": ".\/?_task=mail", "user_id": "R32JNoICsDa3XAr7", "compose_extwin": false, "date_format": "yy-mm-dd", "archive_folder": "Messages archiv&AOk-s", "iselectron": true, "username": "malfoo@gmail.com", "plugins": ["jqueryui", "userinfo", "zipdownload", "mel_archivage", "electron", "mel_larry"], "browser_capabilities": { "pdf": "1", "flash": "0", "tiff": "0", "webp": "1" }, "search_mods": { "*": { "subject": 1, "from": 1 }, "[Gmail]\/Messages envoy&AOk-s": { "subject": 1, "to": 1 }, "[Gmail]\/Brouillons": { "subject": 1, "to": 1 }, "INBOX": { "subject": 1, "from": 1 } }, "mailbox": "INBOX", "pagesize": 50, "current_page": 1, "delimiter": "\/", "threading": false, "threads": false, "reply_all_mode": 0, "layout": "widescreen", "quota": true, "drafts_mailbox": "[Gmail]\/Brouillons", "trash_mailbox": "[Gmail]\/Corbeille", "junk_mailbox": "[Gmail]\/Spam", "read_when_deleted": true, "display_next": true, "unreadwrap": "%s", "collapsed_folders": "", "mailboxes": { "INBOX": { "id": "INBOX", "name": "Bo\u00eete de r\u00e9ception", "virtual": false, "class": "inbox" }, "[Gmail]": { "id": "[Gmail]", "name": "[Gmail]", "virtual": true }, "[Gmail]\/Brouillons": { "id": "[Gmail]\/Brouillons", "name": "Brouillons", "virtual": false, "class": "drafts" }, "[Gmail]\/Messages envoy&AOk-s": { "id": "[Gmail]\/Messages envoy&AOk-s", "name": "Envoy\u00e9s", "virtual": false, "class": "sent" }, "[Gmail]\/Spam": { "id": "[Gmail]\/Spam", "name": "Pourriels", "virtual": false, "class": "junk" }, "[Gmail]\/Corbeille": { "id": "[Gmail]\/Corbeille", "name": "Corbeille", "virtual": false, "class": "trash" }, "[Gmail]\/Important": { "id": "[Gmail]\/Important", "name": "Important", "virtual": false }, "[Gmail]\/Suivis": { "id": "[Gmail]\/Suivis", "name": "Suivis", "virtual": false }, "[Gmail]\/Tous les messages": { "id": "[Gmail]\/Tous les messages", "name": "Tous les messages", "virtual": false }, "Notes": { "id": "Notes", "name": "Notes", "virtual": false }, "Personnel": { "id": "Personnel", "name": "Personnel", "virtual": false }, "Professionnel": { "id": "Professionnel", "name": "Professionnel", "virtual": false }, "Re&AOc-us": { "id": "Re&AOc-us", "name": "Re\u00e7us", "virtual": false } }, "mailboxes_list": ["INBOX", "[Gmail]", "[Gmail]\/Brouillons", "[Gmail]\/Messages envoy&AOk-s", "[Gmail]\/Spam", "[Gmail]\/Corbeille", "[Gmail]\/Important", "[Gmail]\/Suivis", "[Gmail]\/Tous les messages", "Notes", "Personnel", "Professionnel", "Re&AOc-us"], "col_movable": true, "autoexpand_threads": 0, "sort_col": "", "sort_order": "DESC", "messages": [], "listcols": ["subject", "fromto", "date", "flag", "attachment"], "disabled_sort_col": false, "disabled_sort_order": false, "coltypes": { "threads": { "className": "threads", "id": "rcmthreads", "label": "", "sortable": false }, "subject": { "className": "subject", "id": "rcmsubject", "label": "Objet", "sortable": true }, "fromto": { "className": "fromto", "id": "rcmfromto", "label": "De", "sortable": true }, "date": { "className": "date", "id": "rcmdate", "label": "Date", "sortable": true }, "flag": { "className": "flag", "id": "rcmflag", "label": "", "sortable": false }, "attachment": { "className": "attachment", "id": "rcmattachment", "label": "", "sortable": false } }, "contentframe": "messagecontframe", "blankpage": "skins\/mel_larry\/watermark.html", "max_filesize": 2097152, "filesizeerror": "Le fichier t\u00e9l\u00e9vers\u00e9 d\u00e9passe la taille maximale de 2.0 Mo.", "max_filecount": "20", "filecounterror": "Vous pouvez t\u00e9l\u00e9verser un maximum de 20 fichiers \u00e0 la fois.", "request_token": "3MI8xmf8R7ohC653hgq0aJLPTALD91vu" });
+    rcmail.add_label({ "loading": "Chargement...", "servererror": "Erreur de serveur !", "connerror": "Erreur de connexion (n'a pu atteindre le serveur) !", "requesttimedout": "D\u00e9lai de la requ\u00eate expir\u00e9", "refreshing": "Actualisation...", "windowopenerror": "La fen\u00eatre contextuelle a \u00e9t\u00e9 bloqu\u00e9e !", "uploadingmany": "T\u00e9l\u00e9versement des fichiers...", "close": "Fermer", "mel_archivage.null": " ", "mel_archivage.title": "Archiver les courriels de ce dossier", "mel_archivage.archive": "Archiver", "mel_archivage.date": "Soit jusqu'au : ", "mel_archivage.nb_jours": "Messages de plus de  : ", "mel_archivage.jours": "jours", "mel_archivage.buttontext": "Archiver", "mel_archivage.buttontitle": "Archiver ce courriel", "mel_archivage.description": "Comment fonctionne l'archivage : S\u00e9lectionnez un nombre de jours ou une date, tous les messages du dossier s\u00e9lectionn\u00e9 ant\u00e9rieurs \u00e0 cette date seront t\u00e9l\u00e9charg\u00e9s sur votre poste. Ces messages ne seront pas supprim\u00e9s de votre messagerie mais d\u00e9plac\u00e9s dans un dossier Messages archiv\u00e9s. Une fois que l'archive t\u00e9l\u00e9charg\u00e9e vous convient, vous pouvez supprimer les messages contenus dans Messages archiv\u00e9s pour lib\u00e9rer de la place.", "mel_archivage.generating_archive": "G\u00e9n\u00e9ration de l'archive en cours...", "mel_archivage.dont_reload_page": "Ne pas fermer la fen\u00eatre", "mel_archivage.archive_generated": "L'archive est g\u00e9n\u00e9r\u00e9e et va \u00eatre t\u00e9l\u00e9charg\u00e9e. La page va se recharger dans quelques instants", "mel_archivage.archive_downloading": "L'archive est en cours de t\u00e9l\u00e9chargement. Vous pouvez fermer la fen\u00eatre, les mails continuerons de se t\u00e9l\u00e9charger en arri\u00e8re-plan. Les mails dispara\u00eetrons de la liste apr\u00e8s l'actualisation de la page.", "mel_archivage.archive_downloading_finish": "T\u00e9l\u00e9chargement des mails archiv\u00e9s termin\u00e9", "mel_archivage.error_no_message": "Il n'y a pas de courriel \u00e0 archiver. Essayer de diminuer le nombre de jours.", "mel_archivage.error_bad_folder": "Vous ne pouvez pas archiver ce dossier (c'est d\u00e9j\u00e0 un dossier d'archives)", "mel_archivage.error_too_many_messages": "Une erreur s'est produite lors de la g\u00e9n\u00e9ration de l'archive. Essayez de r\u00e9duire le nombre de jours pour diminuer la taille de l'archive.", "mel_archivage.INBOX": "boite de reception", "mel_archivage.help": "Afficher l'aide", "electron.null": " ", "electron.title": "Plugin Electron", "electron.buttontext": "Electron", "electron.buttontitle": "Electron button", "mel_larry.control": "Affichage des messages", "mel_larry.discussion": "Discussion", "mel_larry.search_in": "Rechercher dans", "mel_larry.search_in_all_folders": "Rechercher dans tous les dossiers", "mel_larry.search_in_all_contacts": "Rechercher dans tous les contacts", "mel_larry.search_in_calendars": "Rechercher dans les agendas", "mel_larry.search_in_tasks": "Rechercher dans les t\u00e2ches", "mel_larry.showcontactstitle": "Ouvrir la fen\u00eatre pour chercher un contact", "mel_larry.allcontacts": "Tous les contacts", "mel_larry.allannuaires": "Tous les annuaires", "mel_larry.personalannuaire": "Annuaire personnel et minist\u00e9riel (M\u00e9l)", "mel_larry.foundin": "Trouv\u00e9 dans", "mel_larry.personalcalendar": "Agenda personnel", "mel_larry.personaladdressbook": "Carnet personnel", "mel_larry.personaltasks": "T\u00e2ches personnelles", "mel_larry.help": "Aide", "checkingmail": "Rel\u00e8ve des nouveaux courriels...", "deletemessage": "Supprimer le courriel", "movemessagetotrash": "D\u00e9placer le courriel vers la corbeille", "movingmessage": "D\u00e9placement des courriels...", "copyingmessage": "Copie des courriels...", "deletingmessage": "Suppression des courriels...", "markingmessage": "Marquage des courriels...", "copy": "Copier", "move": "D\u00e9placer", "quota": "Utilisation du disque", "replyall": "R\u00e9pondre \u00e0 tous", "replylist": "R\u00e9pondre \u00e0 la liste", "stillsearching": "Recherche toujours en cours...", "flagged": "Signal\u00e9", "unflagged": "Non signal\u00e9", "unread": "Non lu", "deleted": "Supprim\u00e9", "replied": "R\u00e9ponse faite", "forwarded": "Transf\u00e9r\u00e9", "priority": "Priorit\u00e9", "withattachment": "Avec pi\u00e8ce jointe", "fileuploaderror": "\u00c9chec lors du t\u00e9l\u00e9versement du fichier", "mark": "Marquer", "markallread": "Tout marquer comme lu", "folders-cur": "Dossier s\u00e9lectionn\u00e9 seulement", "folders-sub": "Dossier s\u00e9lectionn\u00e9 et ses sous-dossiers", "folders-all": "Tous les dossiers", "cancel": "Annuler", "errortitle": "Une erreur est survenue !", "toggleadvancedoptions": "Activer\/d\u00e9sactiver les options avanc\u00e9es", "searching": "Recherche...", "purgefolderconfirm": "Voulez-vous vraiment supprimer tous les courriels dans ce dossier ?", "deletemessagesconfirm": "Voulez-vous vraiment supprimer les courriels s\u00e9lectionn\u00e9s ?", "from": "De", "to": "\u00c0", "selectimportfile": "Veuillez choisir un fichier \u00e0 t\u00e9l\u00e9verser.", "importwait": "Importation, veuillez patienter..." });
+    rcmail.gui_container("taskbar_mel", "taskbar");
+    rcmail.gui_container("junkmenu", "junkmenu-menu");
+    rcmail.gui_container("forwardmenu", "forwardmenu-menu");
+    rcmail.gui_container("replyallmenu", "replyallmenu-menu");
+    rcmail.gui_container("folderlistheader-first", "folderlistheader-first");
+    rcmail.gui_container("folderlistheader-last", "folderlistheader-last");
+    rcmail.gui_container("listcontrols", "listcontrols");
+    rcmail.gui_container("mailboxoptions", "mailboxoptionsmenu");
+    rcmail.register_button('logout', 'rcmbtn100', 'link', '', 'button-logout active', '');
+    rcmail.register_button('mail', 'rcmbtn101', 'link', '', 'button-mail button-selected', '');
+    rcmail.register_button('addressbook', 'rcmbtn102', 'link', '', 'button-addressbook button-selected', '');
+    rcmail.register_button('calendar', 'rcmbtn103', 'link', '', 'button-calendar button-selected', '');
+    rcmail.register_button('discussion', 'rcmbtn104', 'link', '', 'button-discussion button-selected', '');
+    rcmail.register_button('tasks', 'rcmbtn105', 'link', '', 'button-tasklist button-selected', '');
+    rcmail.register_button('settings', 'rcmbtn106', 'link', '', 'button-settings button-selected', '');
+    rcmail.register_button('logout', 'rcmbtn107', 'link', '', 'button-logout', '');
+    rcmail.register_button('compose', 'rcmbtn108', 'link', 'button compose', 'button compose pressed', '');
+    rcmail.register_button('checkmail', 'rcmbtn109', 'link', 'button checkmail', 'button checkmail pressed', '');
+    rcmail.register_button('move', 'rcmbtn110', 'link', 'button move', 'button move pressed', '');
+    rcmail.register_button('plugin.mel_junk', 'rcmbtn111', 'link', 'button junk', 'button junk pressed', '');
+    rcmail.register_button('plugin.markasjunk', 'rcmbtn112', 'link', 'button junk', 'button junk pressed', '');
+    rcmail.register_button('delete', 'rcmbtn113', 'link', 'button delete', 'button delete pressed', '');
+    rcmail.register_button('reply', 'rcmbtn114', 'link', 'button reply', 'button reply pressed', '');
+    rcmail.register_button('reply-all', 'rcmbtn115', 'link', 'button reply-all', 'button reply-all pressed', '');
+    rcmail.register_button('forward', 'rcmbtn116', 'link', 'button forward', 'button forward pressed', '');
+    rcmail.register_button('plugin.bounce.box', 'rcmbtn117', 'link', 'button bounce', 'button bounce pbuttontextressed', '');
+    rcmail.register_button('plugin.thunderbird_labels.rcm_tb_label_submenu', 'tb_label_popuplink', 'link', 'button thunderbird', 'button thunderbird pressed', '');
+    rcmail.register_button('plugin_archiver', 'rcmbtn118', 'link', 'button archiver', 'button archiver pressed', '');
+    rcmail.register_button('managesieve-create', 'rcmbtn119', 'link', 'button filterlink', 'button filterlink pressed', '');
+    rcmail.register_button('print', 'rcmbtn120', 'link', 'button print', 'button print pressed', '');
+    rcmail.register_button('calendar-create-from-mail', 'rcmbtn121', 'link', 'button calendarlink', 'button calendarlink pressed', '');
+    rcmail.register_button('plugin.markasjunk', 'rcmbtn122', 'link', 'markasjunk active', '', '');
+    rcmail.register_button('plugin.mel_junk_send', 'rcmbtn123', 'link', 'junkadmin active', '', '');
+    rcmail.register_button('forward-inline', 'rcmbtn124', 'link', 'forwardlink active', '', '');
+    rcmail.register_button('forward-attachment', 'rcmbtn125', 'link', 'forwardattachmentlink active', '', '');
+    rcmail.register_button('reply-all', 'rcmbtn126', 'link', 'replyalllink active', '', '');
+    rcmail.register_button('reply-list', 'rcmbtn127', 'link', 'replylistlink active', '', '');
+    rcmail.register_button('download', 'rcmbtn128', 'link', 'icon active', '', '');
+    rcmail.register_button('edit', 'rcmbtn129', 'link', 'icon active', '', '');
+    rcmail.register_button('viewsource', 'rcmbtn130', 'link', 'icon active', '', '');
+    rcmail.register_button('copy', 'rcmbtn131', 'link', 'icon active', '', '');
+    rcmail.register_button('open', 'rcmbtn132', 'link', 'icon active', '', '');
+    rcmail.register_button('mark', 'rcmbtn133', 'link', 'icon active', '', '');
+    rcmail.register_button('mark', 'rcmbtn134', 'link', 'icon active', '', '');
+    rcmail.register_button('mark', 'rcmbtn135', 'link', 'icon active', '', '');
+    rcmail.register_button('mark', 'rcmbtn136', 'link', 'icon active', '', '');
+    rcmail.register_button('menu-open', 'searchmenulink', 'link', '', '', '');
+    rcmail.gui_object('qsearchbox', 'quicksearchbox');
+    rcmail.register_button('reset-search', 'searchreset', 'link', '', '', '');
+    rcmail.gui_object('search_filter', 'messagessearchfilter');
+    rcmail.gui_object('search_interval', 's_interval');
+    rcmail.gui_object('mailboxlist', 'mailboxlist');
+    rcmail.gui_object('quotadisplay', 'quotadisplay');
+    rcmail.gui_object('messagelist', 'messagelist');
+    rcmail.register_button('set-listmode', 'maillistmode', 'link', 'iconbutton listmode', '', '');
+    rcmail.register_button('set-listmode', 'mailthreadmode', 'link', 'iconbutton threadmode', '', '');
+    rcmail.gui_object('countdisplay', 'rcmcountdisplay');
+    rcmail.register_button('firstpage', 'rcmbtn137', 'link', 'button firstpage', 'button firstpage pressed', '');
+    rcmail.register_button('previouspage', 'rcmbtn138', 'link', 'button prevpage', 'button prevpage pressed', '');
+    rcmail.register_button('nextpage', 'rcmbtn139', 'link', 'button nextpage', 'button nextpage pressed', '');
+    rcmail.register_button('lastpage', 'rcmbtn140', 'link', 'button lastpage', 'button lastpage pressed', '');
+    rcmail.register_button('move', 'rcmbtn141', 'link', 'active', '', '');
+    rcmail.register_button('copy', 'rcmbtn142', 'link', 'active', '', '');
+    rcmail.register_button('expunge', 'rcmbtn143', 'link', 'active', '', '');
+    rcmail.register_button('purge', 'rcmbtn144', 'link', 'active', '', '');
+    rcmail.register_button('mark-all-read', 'rcmbtn145', 'link', 'active', '', '');
+    rcmail.register_button('import-messages', 'rcmbtn146', 'link', 'active', '', '');
+    rcmail.register_button('settings.folders', 'rcmbtn147', 'link', 'active', '', '');
+    rcmail.register_button('select-all', 'rcmbtn148', 'link', 'icon active', '', '');
+    rcmail.register_button('select-all', 'rcmbtn149', 'link', 'icon active', '', '');
+    rcmail.register_button('select-all', 'rcmbtn150', 'link', 'icon active', '', '');
+    rcmail.register_button('select-all', 'rcmbtn151', 'link', 'icon active', '', '');
+    rcmail.register_button('select-all', 'rcmbtn152', 'link', 'icon active', '', '');
+    rcmail.register_button('select-none', 'rcmbtn153', 'link', 'icon active', '', '');
+    rcmail.register_button('expand-all', 'rcmbtn154', 'link', 'icon active', '', '');
+    rcmail.register_button('expand-unread', 'rcmbtn155', 'link', 'icon active', '', '');
+    rcmail.register_button('collapse-all', 'rcmbtn156', 'link', 'icon active', '', '');
+    rcmail.register_button('menu-save', 'listmenusave', 'input', '', '', '');
+    rcmail.register_button('menu-close', 'listmenucancel', 'input', '', '', '');
+    rcmail.gui_object('importform', 'uploadformFrm');
+    rcmail.gui_object('message', 'messagestack');
   </script>
-  
+
   <script type="text/javascript" src="plugins/jqueryui/js/jquery-ui.min.js?s=1604052511"></script>
   <script type="text/javascript" src="plugins/jqueryui/js/i18n/jquery.ui.datepicker-fr.js?s=1604052511"></script>
   <script type="text/javascript" src="plugins/mel_archivage/mel_archivage.js?s=1604054081"></script>
   <script type="text/javascript" src="plugins/electron/electron.js?s=1605192836"></script>
   <script type="text/javascript" src="plugins/mel_larry/js/ui.min.js?s=1604052521"></script>
   <script type="text/javascript" src="plugins/mel_larry/js/mel.min.js?s=1604052521"></script>
-  </head>
-<body class="iframe fullheight">
+</head>
+
+<body class="iframe fullheight" id="iframe_messagepreview">
 
   <div id="messageheader" class="previewheader">
 
     <!-- record navigation -->
     <div id="countcontrols" role="toolbar" aria-labelledby="aria-label-messagetoolbar">
-    <h2 id="aria-label-messagetoolbar" class="voice">Actions sur les courriels</h2>
-    
+      <h2 id="aria-label-messagetoolbar" class="voice">Actions sur les courriels</h2>
+
       <span class="buttongroup">
-        <a class="button first changeformat html selected" title="Afficher au format HTML" id="rcmbtn100" role="button" href="#" onclick="return rcmail.command('change-format','html',this,event)" tabindex="0" aria-disabled="false"><span class="icon">HTML</span></a><a class="button last changeformat text" title="Afficher au format texte en clair" id="rcmbtn101" role="button" href="#" onclick="return rcmail.command('change-format','text',this,event)" tabindex="0" aria-disabled="false"><span class="icon">Text</span></a>
+        <a class="button first changeformat html selected" title="Afficher au format HTML" id="rcmbtn100" role="button"
+          href="#" onclick="return rcmail.command('change-format','html',this,event)" tabindex="0"
+          aria-disabled="false"><span class="icon">HTML</span></a><a class="button last changeformat text"
+          title="Afficher au format texte en clair" id="rcmbtn101" role="button" href="#"
+          onclick="return rcmail.command('change-format','text',this,event)" tabindex="0" aria-disabled="false"><span
+            class="icon">Text</span></a>
       </span>
-    
-    
+
+
       &nbsp;
-      <a class="button reply" title="Répondre à l'expéditeur" id="rcmbtn102" role="button" href="#" onclick="return rcmail.command('reply','',this,event)" tabindex="0" aria-disabled="false"><span class="icon">Répondre à l'expéditeur</span></a>
-      <a class="button replyall" title="Répondre à la liste, ou à l'expéditeur et à tous les destinataires" id="rcmbtn103" role="button" href="#" onclick="return rcmail.command('reply-all','',this,event)" tabindex="0" aria-disabled="false"><span class="icon">Répondre à la liste, ou à l'expéditeur et à tous les destinataires</span></a>
-      <a class="button forward" title="Transférer le courriel" id="rcmbtn104" role="button" href="#" onclick="return rcmail.command('forward','',this,event)" tabindex="0" aria-disabled="false"><span class="icon">Transférer le courriel</span></a>
-      <a class="button calendarlink disabled" title="[calendar.createfrommail]" id="rcmbtn105" role="button" tabindex="-1" aria-disabled="true" href="#" onclick="return rcmail.command('calendar-create-from-mail','',this,event)">[calendar.createfrommail]</a>
-    
-    
+      <a class="button reply" title="Répondre à l'expéditeur" id="rcmbtn102" role="button" href="#"
+        onclick="return rcmail.command('reply','',this,event)" tabindex="0" aria-disabled="false"><span
+          class="icon">Répondre à l'expéditeur</span></a>
+      <a class="button replyall" title="Répondre à la liste, ou à l'expéditeur et à tous les destinataires"
+        id="rcmbtn103" role="button" href="#" onclick="return rcmail.command('reply-all','',this,event)" tabindex="0"
+        aria-disabled="false"><span class="icon">Répondre à la liste, ou à l'expéditeur et à tous les
+          destinataires</span></a>
+      <a class="button forward" title="Transférer le courriel" id="rcmbtn104" role="button" href="#"
+        onclick="return rcmail.command('forward','',this,event)" tabindex="0" aria-disabled="false"><span
+          class="icon">Transférer le courriel</span></a>
+      <a class="button calendarlink disabled" title="[calendar.createfrommail]" id="rcmbtn105" role="button"
+        tabindex="-1" aria-disabled="true" href="#"
+        onclick="return rcmail.command('calendar-create-from-mail','',this,event)">[calendar.createfrommail]</a>
+
+
       &nbsp;
-      <a class="button extwin" title="Ouvrir dans une nouvelle fenêtre" id="rcmbtn106" role="button" href="./?_task=mail&amp;_action=show&amp;_uid=6168&amp;_mbox=INBOX" onclick="return rcmail.command('extwin','',this,event)" tabindex="0" aria-disabled="false"><span class="icon">Ouvrir dans une nouvelle fenêtre</span></a>
-    
+      <a class="button extwin" title="Ouvrir dans une nouvelle fenêtre" id="rcmbtn106" role="button"
+        href="./?_task=mail&amp;_action=show&amp;_uid=6168&amp;_mbox=INBOX"
+        onclick="return rcmail.command('extwin','',this,event)" tabindex="0" aria-disabled="false"><span
+          class="icon">Ouvrir dans une nouvelle fenêtre</span></a>
+
     </div>
-    
+
     <h3 class="subject"><span class="voice">Objet: </span>%%SUBJECT%%</span></h3>
-    
+
     <span class="date"><span class="voice">Date: </span>%%DATE%%</span>
+
+    <div id="contactphoto"><img src="./?_task=addressbook&amp;_action=photo&amp;_email=Steam+Support"
+        alt="Photo du contact" onerror="this.src = 'program/resources/blank.gif'"></div>
+
+    		<span class="from">
+          <span class="voice">De: </span>
+          <span class="adr">
+            <a href="#" class="rcmContactAddress">
+              <span class="name">%%FROM_NAME%%</span>
+              <span class="mailto">%%FROM%%</span>
+            </a>
+            <a href="#" class="rcmaddcontact">
+              <img src="skins/mel_larry/images/addcontact.png" alt="Add contact" class="noselect">
+            </a>
+          </span>
+        </span>
     
-    <div id="contactphoto"><img src="./?_task=addressbook&amp;_action=photo&amp;_email=Steam+Support" alt="Photo du contact" onerror="this.src = 'program/resources/blank.gif'"></div>
-    
-    <span class="from"><span class="voice">De: </span><span class="adr" title="%%FROM%%">%%FROM_NAME%%</span></span>
-    
-    <table id="preview-allheaders" class="headers-table"><tbody><tr><td class="header-title">À</td>
-    <td class="header to"><span class="adr"><a href="mailto:malfoo@gmail.com" class="rcmContactAddress" onclick="return rcmail.command('compose','malfoo@gmail.com',this)" title="malfoo@gmail.com">malfoo@gmail.com</a><a href="#add" title="Ajouter au carnet d'adresses" class="rcmaddcontact" onclick="return rcmail.command('add-contact','malfoo@gmail.com',this)"><img src="skins/mel_larry/images/addcontact.png" alt="Add contact" class="noselect"></a></span></td>
-    </tr>
-    </tbody>
+
+    <table id="preview-allheaders" class="headers-table">
+      <tbody>
+        <tr>
+          <td class="header-title">À</td>
+          <td class="header to"><span class="adr"><a href="mailto:malfoo@gmail.com" class="rcmContactAddress"
+                onclick="return rcmail.command('compose','malfoo@gmail.com',this)"
+                title="malfoo@gmail.com">malfoo@gmail.com</a><a href="#add" title="Ajouter au carnet d'adresses"
+                class="rcmaddcontact" onclick="return rcmail.command('add-contact','malfoo@gmail.com',this)"><img
+                  src="skins/mel_larry/images/addcontact.png" alt="Add contact" class="noselect"></a></span></td>
+        </tr>
+      </tbody>
     </table>
-    
-    
-    <div id="full-headers"><div id="all-headers" class="all" style="display:none"><div id="headers-source"></div></div>
-    <div class="more-headers show-headers" onclick="return rcmail.command('show-headers','',this)" title="Afficher/masquer les en-têtes brutes de courriels"></div></div>
-    
-    
+
+
+    <div id="full-headers">
+      <div id="all-headers" class="all" style="display:none">
+        <div id="headers-source"></div>
+      </div>
+      <div class="more-headers show-headers" onclick="return rcmail.command('show-headers','',this)"
+        title="Afficher/masquer les en-têtes brutes de courriels"></div>
     </div>
-    
-    <div id="messagepreview" role="main">
-    <div class="rightcol" role="region" aria-labelledby="aria-label-messageattachments" aria-hidden="true" style="display: none;">
-    <h2 id="aria-label-messageattachments" class="voice">Pièces jointes</h2>
-    
+
+
+  </div>
+
+  <div id="messagepreview" role="main">
+    <div class="rightcol" role="region" aria-labelledby="aria-label-messageattachments" aria-hidden="true"
+      style="display: none;">
+      <h2 id="aria-label-messageattachments" class="voice">Pièces jointes</h2>
+      <ul id="attachment-list" class="attachmentslist">%%ATTACHMENT%%</ul>
     </div>
     <div class="leftcol" role="region" aria-labelledby="aria-label-messagebody" style="margin-right: 0px;">
-    <h2 id="aria-label-messagebody" class="voice">Corps du courriel</h2>
-    <div id="message-objects">
-      <div id="remote-objects-message" class="notice" style="display: none">Pour protéger votre confidentialité, les images distantes sont bloquées dans ce courriel.&nbsp;<a href="#loadimages" onclick="rcmail.command('load-images')" class="button">Afficher les images</a></div>
+      <h2 id="aria-label-messagebody" class="voice">Corps du courriel</h2>
+      <div id="message-objects">
+        <div id="remote-objects-message" class="notice" style="display: none">Pour protéger votre confidentialité, les
+          images distantes sont bloquées dans ce courriel.&nbsp;<a href="#loadimages"
+            onclick="rcmail.command('load-images')" class="button">Afficher les images</a></div>
       </div>
-    <div id="messagebody"><div class="message-htmlpart" id="message-htmlpart1"><div class="rcmBody"><p>%%OBJECT%%</p></div></div>
+      <div id="messagebody">
+        <div class="message-htmlpart" id="message-htmlpart1">
+          <div class="rcmBody">
+            <p>%%OBJECT%%</p>
+          </div>
+        </div>
+      </div>
+
     </div>
-    
-    </div>
-    </div>
-    
-    <div id="attachmentmenu" class="popupmenu" aria-hidden="true">
-		<ul class="toolbarmenu" id="attachmentoptionsmenu" role="menu">
-			<roundcube:button command="open-attachment" id="attachmenuopen" type="link-menuitem" label="open"
-				class="icon" classAct="icon active" innerclass="icon extwin" />
-			<roundcube:button command="download-attachment" id="attachmenudownload" type="link-menuitem"
-				label="download" class="icon" classAct="icon active" innerclass="icon download" />
-			<roundcube:container name="attachmentmenu" id="attachmentoptionsmenu" />
-		</ul>
-	</div>
-    
-    </body>
+  </div>
+
+  <div id="attachmentmenu" class="popupmenu" aria-hidden="true">
+    <ul class="toolbarmenu" id="attachmentoptionsmenu" role="menu">
+      <roundcube:button command="open-attachment" id="attachmenuopen" type="link-menuitem" label="open" class="icon"
+        classAct="icon active" innerclass="icon extwin" />
+      <roundcube:button command="download-attachment" id="attachmenudownload" type="link-menuitem" label="download"
+        class="icon" classAct="icon active" innerclass="icon download" />
+      <roundcube:container name="attachmentmenu" id="attachmentoptionsmenu" />
+    </ul>
+  </div>
+
+</body>

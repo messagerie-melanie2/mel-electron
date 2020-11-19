@@ -135,7 +135,7 @@ module.exports = {
           // let size = " (~" + functions.formatBytes(element['buf'].toString().length, 0) + ")";
 
           html = html.replace('style="display: none;"', '');
-          html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='openAttachment(" + uid + "," + element["partid"] + ")' id='attachment' title='" + filename  + "'>" + filename + "</a></li>%%ATTACHMENT%%");
+          html = html.replace('%%ATTACHMENT%%', "<li id='attach2' class='application " + ctype[1] + "'><a href='#' onclick='parent.openAttachment(" + uid + "," + element["partid"] + ")' id='attachment' title='" + filename  + "'>" + filename + "</a></li>%%ATTACHMENT%%");
         }
       })
     }
