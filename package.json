@@ -51,6 +51,7 @@
     "app": "^0.1.0",
     "dotenv": "^8.2.0",
     "dree": "^2.4.15",
+    "electron-context-menu": "^2.3.0",
     "electron-db": "^1.0.0",
     "electron-dl": "^3.0.2",
     "glob": "^7.1.6",
