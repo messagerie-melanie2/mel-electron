@@ -37,7 +37,7 @@ module.exports = {
 
   getSubfolder(path) {
     path = path.replace(/\\/g, "/");
-    path = path.split('Mails Archive/');
+    path = path.split(process.env.ARCHIVE_FOLDER + '/');
     let subfolder = path.pop();
     subfolder = subfolder.split('/');
     subfolder.pop();
@@ -46,7 +46,7 @@ module.exports = {
 
   getSubfolderFile(path) {
     path = path.replace(/\\/g, "/");
-    path = path.split('Mails Archive/');
+    path = path.split(process.env.ARCHIVE_FOLDER + '/');
     let subfolder = path.pop();
     subfolder = subfolder.split('/');
     return subfolder.join('/');

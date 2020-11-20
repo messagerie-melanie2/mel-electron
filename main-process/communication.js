@@ -15,7 +15,7 @@ ipcMain.on('get_archive_folder', (event, msg) => {
   event.sender.send('archive_folder', process.env.ARCHIVE_FOLDER);
 });
 
-// Envoi la liste des sous-dossier dans le dossier 'Mails archive'
+// Envoi la liste des sous-dossier dans le dossier des archives de mails
 ipcMain.on('subfolder', (event, msg) => {
   const options = {
     extensions: []
