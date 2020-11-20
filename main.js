@@ -4,7 +4,6 @@ const glob = require('glob')
 const fs = require('fs')
 const log4js = require("log4js");
 const logger = log4js.getLogger("main");
-
 log4js.configure({
   appenders: {
     everything: { type: 'file', filename: 'logs/logs.log', maxLogSize: 10485760, backups: 3, compress: true }

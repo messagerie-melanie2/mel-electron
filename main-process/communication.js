@@ -100,7 +100,7 @@ ipcMain.on('attachment_select', (event, value) => {
           else if (response.response === 2) {
             const options = {
               title: "Enregistrer un fichier",
-              defaultPath: path.join(app.getPath('downloads'), result.filename),
+              defaultPath: result.filename,
             }
             dialog.showSaveDialog(null, options).then(response => {
               fs.writeFileSync(response.filePath, result.content, (err) => {
