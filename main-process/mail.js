@@ -120,8 +120,9 @@ module.exports = {
     let date_fr = date.toLocaleString('fr-FR', { timeZone: 'UTC' })
     html = html.replace("%%DATE%%", date_fr);
 
-    const regex = /(<style(.*?)*)(\n.*?)*<\/style>/;
-    html = html.replace("%%OBJECT%%", result.object.replace(regex, ""));
+    // const regex = /(<style(.*?)*)(\n.*?)*<\/style>/;
+    html = html.replace("%%OBJECT%%", result.object);
+    // html = html.replace("%%OBJECT%%", result.object.replace(regex, ""));
 
     //Traitement des pièces jointes
     if (result.attachments != []) {
