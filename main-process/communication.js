@@ -8,7 +8,7 @@ const path = require('path');
 const fs = require('fs');
 const log4js = require("log4js");
 const logger = log4js.getLogger("communication");
-
+const css = require('css');
 
 // Envoi le nom du dossier d'archive au plugin electron 
 ipcMain.on('get_archive_folder', (event, msg) => {
@@ -50,9 +50,25 @@ ipcMain.on('mail_select', (event, uid) => {
 
       db.db_mail_select(uid).then((row) => {
         try {
+          let washedCss;
           let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
           mail.traitementMail(eml).then((mail_content) => {
             let html = mail.constructionMail(mail_content, data, uid);
+            let cssRegex = /<style[^>]*>([^<]+)<\/style>/g;
+            const found = html.match(cssRegex);
+            found.forEach((style) => {
+              style = style.replace(/(\r\n|\n|\r)/gm, "").replace(/<[^>]*>/g, "");
+              style = css.parse(style);
+              sheet = style.stylesheet
+             for (let i = 0; i < sheet.rules.length; i++) {
+               const rule = sheet.rules[i];
+               for (let j = 0; j < rule.selectors.length; j++) {
+                 rule.selectors[j] = "#message-htmlpart1 div.rcmBody " + rule.selectors[j];
+               }      
+             }
+              washedCss = css.stringify(style);
+            })
+            html = html.replace(cssRegex, "<style>"+washedCss+"</style>")
             event.sender.send('mail_return', html);
           })
         }
@@ -80,7 +96,7 @@ ipcMain.on('attachment_select', (event, value) => {
       .then((result) => {
 
         let path = app.getPath("temp") + '/' + result.filename;
-        
+
         const options = {
           type: 'question',
           buttons: ['Cancel', 'Ouvrir', 'Enregistrer'],
@@ -114,110 +130,110 @@ ipcMain.on('attachment_select', (event, value) => {
   })
 });
 
-  process.env.ARRET_ARCHIVAGE = 0;
-  //Arrêt de l'archivage avec le plugin mel_electron
-  ipcMain.on('stop-archivage', (events, data) => {
-    process.env.ARRET_ARCHIVAGE = 1;
-  });
+process.env.ARRET_ARCHIVAGE = 0;
+//Arrêt de l'archivage avec le plugin mel_electron
+ipcMain.on('stop-archivage', (events, data) => {
+  process.env.ARRET_ARCHIVAGE = 1;
+});
 
-  // Téléchargement des mails avec le plugin mel_archivage 
-  ipcMain.on('download_eml', (events, data) => {
-    //On récupère le token pour le téléchargement des mails
-    let token = data.token;
+// Téléchargement des mails avec le plugin mel_archivage 
+ipcMain.on('download_eml', (events, data) => {
+  //On récupère le token pour le téléchargement des mails
+  let token = data.token;
 
-    //Si une liste de téléchargement est envoyée on réécrit dans le fichier, sinon on le lit pour finir l'archivage précédent
-    if (data.files) {
-      fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(data.files));
-      logger.info("Debut de l'archivage")
-    }
-    if (fs.existsSync(process.env.PATH_LISTE_ARCHIVE)) {
-      //On récupère les données de l'archivage
-      let file_data = JSON.parse(fs.readFileSync(process.env.PATH_LISTE_ARCHIVE))
+  //Si une liste de téléchargement est envoyée on réécrit dans le fichier, sinon on le lit pour finir l'archivage précédent
+  if (data.files) {
+    fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(data.files));
+    logger.info("Debut de l'archivage")
+  }
+  if (fs.existsSync(process.env.PATH_LISTE_ARCHIVE)) {
+    //On récupère les données de l'archivage
+    let file_data = JSON.parse(fs.readFileSync(process.env.PATH_LISTE_ARCHIVE))
+    if (file_data.length > 0) {
+      let copy_files = [...file_data];
+      let path_folder;
       if (file_data.length > 0) {
-        let copy_files = [...file_data];
-        let path_folder;
-        if (file_data.length > 0) {
-          events.sender.send('download-advancement', { "length": file_data.length });
-          let file = file_data.pop();
-          path_folder = functions.createFolderIfNotExist(file.path_folder)
-          try {
-            download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
-          } catch (err) {
-            logger.error(err)
-          }
+        events.sender.send('download-advancement', { "length": file_data.length });
+        let file = file_data.pop();
+        path_folder = functions.createFolderIfNotExist(file.path_folder)
+        try {
+          download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+        } catch (err) {
+          logger.error(err)
         }
-        else {
-          events.sender.send('download-finish');
-        }
-        session.defaultSession.on('will-download', (event, item, webContents) => {
-          item.on('done', (event, state) => {
-            if (state === 'completed') {
-              let uid = new URLSearchParams(item.getURL()).get('_uid');
-              let file = copy_files.find((post) => {
-                if (post.uid == uid) {
-                  return true;
-                }
-              })
-              functions.traitementColsFile(item.getSavePath()).then(element => {
-                element.etiquettes = JSON.stringify(file.etiquettes);
-                db.db_insert_archive(element);
-              });
-              events.sender.send('download-advancement', { "length": file_data.length, "uid": file.uid, "mbox": file.mbox });
-              if (file_data.length > 0) {
-                //Si on arrête l'archivage
-                if (process.env.ARRET_ARCHIVAGE != 0) {
-                  process.env.ARRET_ARCHIVAGE = 0;
-                  file_data = [];
-                  fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
-                  events.sender.send('download-finish');
-                  session.defaultSession.removeAllListeners();
-                }
-                else {
-                  fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
-                  let file = file_data.pop();
-                  try {
-                    download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
-                  } catch (err) {
-                    logger.error(err)
-                  }
-                }
+      }
+      else {
+        events.sender.send('download-finish');
+      }
+      session.defaultSession.on('will-download', (event, item, webContents) => {
+        item.on('done', (event, state) => {
+          if (state === 'completed') {
+            let uid = new URLSearchParams(item.getURL()).get('_uid');
+            let file = copy_files.find((post) => {
+              if (post.uid == uid) {
+                return true;
               }
-              else {
+            })
+            functions.traitementColsFile(item.getSavePath()).then(element => {
+              element.etiquettes = JSON.stringify(file.etiquettes);
+              db.db_insert_archive(element);
+            });
+            events.sender.send('download-advancement', { "length": file_data.length, "uid": file.uid, "mbox": file.mbox });
+            if (file_data.length > 0) {
+              //Si on arrête l'archivage
+              if (process.env.ARRET_ARCHIVAGE != 0) {
+                process.env.ARRET_ARCHIVAGE = 0;
+                file_data = [];
                 fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
                 events.sender.send('download-finish');
                 session.defaultSession.removeAllListeners();
               }
-            } else {
-              logger.error(`Téléchargement échoué : ${state}`)
+              else {
+                fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
+                let file = file_data.pop();
+                try {
+                  download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
+                } catch (err) {
+                  logger.error(err)
+                }
+              }
             }
-          })
+            else {
+              fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
+              events.sender.send('download-finish');
+              session.defaultSession.removeAllListeners();
+            }
+          } else {
+            logger.error(`Téléchargement échoué : ${state}`)
+          }
         })
-      }
-    }
-  });
-
-  ipcMain.on('delete_selected_mail', (events, uids) => {
-    try {
-      db.db_get_path(uids).then((rows) => {
-        rows.forEach(row => {
-          try {
-            fs.unlinkSync(path.join(process.env.PATH_ARCHIVE, row.path_file));
-          } catch (error) { logger.error('Erreur de suppression du fichier : ' + row.path_file); }
-          db.db_delete_selected_mail(row.id);
-        });
       })
     }
-    catch (err) { logger.error(err) }
-  })
+  }
+});
 
-  ipcMain.on('read_unread', (events, etiquettes) => {
-    let uid = etiquettes.uid
-    delete etiquettes.uid;
-    db.db_update_etiquettes(uid, JSON.stringify(etiquettes));
-  });
+ipcMain.on('delete_selected_mail', (events, uids) => {
+  try {
+    db.db_get_path(uids).then((rows) => {
+      rows.forEach(row => {
+        try {
+          fs.unlinkSync(path.join(process.env.PATH_ARCHIVE, row.path_file));
+        } catch (error) { logger.error('Erreur de suppression du fichier : ' + row.path_file); }
+        db.db_delete_selected_mail(row.id);
+      });
+    })
+  }
+  catch (err) { logger.error(err) }
+})
 
-  ipcMain.on('flag_unflagged', (events, etiquettes) => {
-    let uid = etiquettes.uid
-    delete etiquettes.uid;
-    db.db_update_etiquettes(uid, JSON.stringify(etiquettes));
-  });
+ipcMain.on('read_unread', (events, etiquettes) => {
+  let uid = etiquettes.uid
+  delete etiquettes.uid;
+  db.db_update_etiquettes(uid, JSON.stringify(etiquettes));
+});
+
+ipcMain.on('flag_unflagged', (events, etiquettes) => {
+  let uid = etiquettes.uid
+  delete etiquettes.uid;
+  db.db_update_etiquettes(uid, JSON.stringify(etiquettes));
+});
