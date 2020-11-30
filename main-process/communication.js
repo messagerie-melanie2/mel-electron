@@ -54,21 +54,30 @@ ipcMain.on('mail_select', (event, uid) => {
           let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
           mail.traitementMail(eml).then((mail_content) => {
             let html = mail.constructionMail(mail_content, data, uid);
+            //Cherche tous le contenu entre <style> et </style>
             let cssRegex = /<style[^>]*>([^<]+)<\/style>/g;
-            const found = html.match(cssRegex);
-            found.forEach((style) => {
-              style = style.replace(/(\r\n|\n|\r)/gm, "").replace(/<[^>]*>/g, "");
-              style = css.parse(style);
-              sheet = style.stylesheet
-             for (let i = 0; i < sheet.rules.length; i++) {
-               const rule = sheet.rules[i];
-               for (let j = 0; j < rule.selectors.length; j++) {
-                 rule.selectors[j] = "#message-htmlpart1 div.rcmBody " + rule.selectors[j];
-               }      
-             }
-              washedCss = css.stringify(style);
-            })
-            html = html.replace(cssRegex, "<style>"+washedCss+"</style>")
+            let linkRegex = /<link.+?>/g;
+
+            const foundCss = html.match(cssRegex);
+            //Si il y a des balise <style> dans le mail
+            if (foundCss) {
+              foundCss.forEach((style) => {
+                style = style.replace(/(\r\n|\n|\r)/gm, "").replace(/<[^>]*>/g, "");
+                style = css.parse(style);
+                sheet = style.stylesheet
+                for (let i = 0; i < sheet.rules.length; i++) {
+                  const rule = sheet.rules[i];
+                  if (rule.selectors) {
+                    for (let j = 0; j < rule.selectors.length; j++) {
+                      rule.selectors[j] = "#message-htmlpart1 div.rcmBody " + rule.selectors[j];
+                    }
+                  }
+                }
+                washedCss = css.stringify(style);
+              })
+              html = html.replace(linkRegex, "");
+              html = html.replace(cssRegex, "<style>" + washedCss + "</style>")
+            }
             event.sender.send('mail_return', html);
           })
         }
