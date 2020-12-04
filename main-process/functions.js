@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const log4js = require("log4js");
 const logger = log4js.getLogger("functions");
+const css = require('css');
 
 module.exports = {
   createFolderIfNotExist(mbox) {
@@ -63,5 +64,42 @@ module.exports = {
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   },
+
+  cleanCss(html) {
+    let washedCss;
+    //Cherche tous le contenu entre <style> et </style>
+    let cssRegex = /<style[^>]*>([^<]+)<\/style>/g;
+
+    try {
+      const foundCss = html.match(cssRegex);
+      if (foundCss) {
+        foundCss.forEach((style) => {
+          //On enlève les retours à la ligne et les balises <style>
+          style = style.replace(/(\r\n|\n|\r)/gm, "").replace(/<[^>]*>/g, "");
+          style = css.parse(style);
+          sheet = style.stylesheet
+          for (let i = 0; i < sheet.rules.length; i++) {
+            const rule = sheet.rules[i];
+            if (rule.selectors) {
+              for (let j = 0; j < rule.selectors.length; j++) {
+                rule.selectors[j] = "#message-htmlpart1 div.rcmBody " + rule.selectors[j];
+              }
+            }
+          }
+          washedCss = css.stringify(style);
+        })
+
+        html = html.replace(cssRegex, "<style>" + washedCss + "</style>")
+      }
+      return html;
+    }
+    catch (err) { logger.error(err) }
+  },
+
+  cleanLink(html) {
+    let linkRegex = /<link.+?>/g;
+    html = html.replace(linkRegex, "");
+    return html;
+  }
 }
 
