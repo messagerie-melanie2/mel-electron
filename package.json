@@ -32,7 +32,7 @@
   },
   "name": "Mel",
   "productName": "Messagerie Mel",
-  "version": "0.5.4",
+  "version": "0.5.6",
   "description": "Courrielleur nouvelle generation",
   "homepage": "https://github.com/messagerie-melanie2/mel-electron",
   "main": "main.js",

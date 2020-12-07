@@ -108,9 +108,6 @@ autoUpdater.on('update-not-available', () => {
 autoUpdater.on('error', err => {
   sendStatusToWindow(`Erreur de la mise à jour automatique ${err.toString()}`);
 })
-autoUpdater.on('update-downloaded', err => {
-  autoUpdater.quitAndInstall();
-})
 
 
 // Require each JS file in the main-process dir
