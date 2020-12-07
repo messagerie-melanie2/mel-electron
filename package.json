@@ -15,6 +15,13 @@
       "icon": "icons/mel.ico",
       "target": [
         "nsis"
+      ],
+      "publish": [
+        {
+          "provider": "github",
+          "owner": "messagerie-melanie2",
+          "repo": "mel-electron"
+        }
       ]
     },
     "linux": {
@@ -39,7 +46,8 @@
   "scripts": {
     "start": "electron .",
     "postinstall": "electron-builder install-app-deps",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "publish": "build -p always"
   },
   "author": "AGoubs <arnaud.goubier@i-carre.net>",
   "license": "ISC",
@@ -55,6 +63,7 @@
     "electron-context-menu": "^2.3.0",
     "electron-db": "^1.0.0",
     "electron-dl": "^3.0.2",
+    "electron-updater": "^4.3.5",
     "glob": "^7.1.6",
     "jquery": "^3.5.0",
     "log4js": "^6.3.0",
