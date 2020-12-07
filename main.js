@@ -99,6 +99,18 @@ const sendStatusToWindow = (text) => {
 autoUpdater.on('checking-for-update', () => {
   sendStatusToWindow('Recherche de mise à jour...');
 })
+autoUpdater.on('update-available', () => {
+  sendStatusToWindow('Mise à jour disponible');
+})
+autoUpdater.on('update-not-available', () => {
+  sendStatusToWindow('Pas de mise à jour disponible');
+})
+autoUpdater.on('error', err => {
+  sendStatusToWindow(`Erreur de la mise à jour automatique ${err.toString()}`);
+})
+autoUpdater.on('update-downloaded', err => {
+  autoUpdater.quitAndInstall();
+})
 
 
 // Require each JS file in the main-process dir
