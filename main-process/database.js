@@ -1,14 +1,13 @@
-const { app, BrowserWindow } = require('electron');
+const { BrowserWindow } = require('electron');
 const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
 const functions = require('./functions.js');
-
+const log4js = require("log4js");
+const logger = log4js.getLogger("database");
 
 (function createDB() {
   const db = new sqlite3.Database(process.env.PATH_DB);
   // Création de la bdd si elle n'existe pas.
   db.run('CREATE TABLE if not exists cols(id INTEGER PRIMARY KEY, subject TEXT, fromto TEXT, date INTEGER, path_file TEXT UNIQUE, subfolder TEXT, break TEXT, content_type TEXT, etiquettes TEXT)');
-
   db.close();
 })();
 
@@ -30,7 +29,7 @@ module.exports = {
         });
       })
     }
-    catch (err) { console.log(err) }
+    catch (err) { logger.error(err) }
   },
 
   db_read_mail_dir(file_path) {
@@ -49,7 +48,7 @@ module.exports = {
         });
       })
     }
-    catch (err) { console.log(err) }
+    catch (err) { logger.error(err.message) }
   },
 
   db_mail_select(uid) {
@@ -68,7 +67,7 @@ module.exports = {
         });
       })
     }
-    catch (err) { console.log(err) }
+    catch (err) { logger.error(err.message) }
   },
 
   db_attachment_select(value) {
@@ -87,19 +86,19 @@ module.exports = {
         });
       })
     }
-    catch (err) { console.log(err) }
+    catch (err) { logger.error(err.message) }
   },
 
   db_insert_archive(element) {
     try {
       const db = new sqlite3.Database(process.env.PATH_DB);
       db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, content_type, etiquettes) VALUES(?,?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, functions.getSubfolderFile(element.path_file), functions.getSubfolder(element.path_file), element.break, element.content_type, element.etiquettes, function (err) {
-        if (err) console.log(err.message);
+        if (err) logger.error(err.message) ;
         else BrowserWindow.getAllWindows()[0].send('add_message_row', { id: this.lastID, subject: element.subject, fromto: element.fromto, date: element.date, content_type: element.content_type, mbox: functions.getSubfolder(element.path_file), etiquettes: element.etiquettes });
       }).finalize();
       db.close();
     }
-    catch (err) { console.log(err) }
+    catch (err) { logger.error(err.message) }
   },
 
   db_update_etiquettes(uid, etiquettes) {
@@ -108,7 +107,7 @@ module.exports = {
       db.run("UPDATE cols SET etiquettes = ? WHERE id = ?", etiquettes, uid);
       db.close()
     }
-    catch (err) { console.log(err) }
+    catch (err) { logger.error(err.message) }
   },
 
   db_delete_selected_mail(uid) {
@@ -117,7 +116,7 @@ module.exports = {
       db.run(`DELETE FROM cols WHERE id = ?`, uid);
       db.close()
     }
-    catch (err) { console.log(err) }
+    catch (err) { logger.error(err.message) }
   },
 
   db_get_path(uids) {
@@ -126,7 +125,7 @@ module.exports = {
         const db = new sqlite3.Database(process.env.PATH_DB);
         db.all('SELECT id, path_file FROM cols WHERE id IN ( ' + uids.map(function(){ return '?' }).join(',') + ' )', uids, (err, row) => {
           if (err) {
-            reject(err)
+            reject(logger.error(err.message))
           }
           else {
             resolve(row)
@@ -134,6 +133,6 @@ module.exports = {
         });
       })
     }
-    catch (err) { console.log(err) }
+    catch (err) { logger.error(err.message) }
   },
 }

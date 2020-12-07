@@ -16,13 +16,21 @@ contextBridge.exposeInMainWorld(
         }
     },
     receive: (channel, func) => {
-        let validChannels = ["mail_dir", "mail_return", "eml_return", "listSubfolder", "download-finish", "download-advancement", "archive_folder", "new_folder", "add_message_row", "result_search"];
-        if (validChannels.includes(channel)) {
-            // Deliberately strip event as it includes `sender` 
+        if (channel != undefined) {
 
-            ipcRenderer.on(channel, (event, ...args) => func(...args));
+            let validChannels = ["mail_dir", "mail_return", "eml_return", "listSubfolder", "download-finish", "download-advancement", "archive_folder", "new_folder", "add_message_row", "result_search"];
+            if (validChannels.includes(channel)) {
+                // Deliberately strip event as it includes `sender` 
 
+                try {
+                    ipcRenderer.on(channel, (event, ...args) => func(...args));
+                } catch (error) {
+                    console.log(error);
+                }
+
+            }
         }
+
     }
 }
 );

@@ -1,13 +1,29 @@
-const { app, BrowserWindow } = require('electron')
-const { dialog } = require('electron')
+const { app, BrowserWindow, dialog } = require('electron')
 const path = require('path')
 const glob = require('glob')
 const fs = require('fs')
+const log4js = require("log4js");
+const logger = log4js.getLogger("main");
+log4js.configure({
+  appenders: {
+    everything: { type: 'file', filename: 'logs/logs.log', maxLogSize: 10485760, backups: 3, compress: true }
+  },
+  categories: {
+    default: { appenders: ['everything'], level: 'debug' }
+  }
+});
+
+logger.info("Démarrage de l'application")
 
 // require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
 require('dotenv').config()
 
-process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), 'Mails Archive')
+if (!process.env.PATH_ARCHIVE) {  
+  process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), process.env.ARCHIVE_FOLDER)
+}
+else  {
+  process.env.PATH_ARCHIVE = path.join(process.env.PATH_ARCHIVE, process.env.ARCHIVE_FOLDER)
+}
 process.env.PATH_DB = path.join(app.getPath("userData"), 'archivage_mails.db');
 process.env.PATH_LISTE_ARCHIVE = path.join(process.env.PATH_ARCHIVE, 'liste_archivage.json')
 
@@ -35,6 +51,7 @@ function initialize() {
       mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD })
     }
     catch {
+      logger.error("Problème d'url lors du chargement de l'application")
       dialog.showMessageBox(null, {
         type: 'error',
         title: 'Erreur',
@@ -44,6 +61,8 @@ function initialize() {
     mainWindow.maximize()
 
     mainWindow.on('closed', () => {
+      logger.info("Arrêt de l'application")
+      log4js.shutdown
       mainWindow = null
     })
   }
