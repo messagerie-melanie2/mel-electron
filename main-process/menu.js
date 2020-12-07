@@ -1,10 +1,16 @@
-// const { Menu } = require('electron');
 
-// const template = [
-//     {
-//         label: "Version " + process.env.VERSION_BUILD
-//     }
-// ]
+const { app, Menu, shell } = require('electron')
+const defaultMenu = require("electron-default-menu");
 
-// const menu = Menu.buildFromTemplate(template);
-// Menu.setApplicationMenu(menu);
+app.on('ready', () => {
+    // Get default menu template
+    const menu = defaultMenu(app, shell);
+
+    // Add custom menu
+    menu.splice(4, 0, {
+        label: `Version ${process.env.npm_package_version}`,
+    });
+
+    // Set application menu
+    Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
+});

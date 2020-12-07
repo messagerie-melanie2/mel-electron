@@ -55,6 +55,7 @@
     "dree": "^2.4.15",
     "electron-context-menu": "^2.3.0",
     "electron-db": "^1.0.0",
+    "electron-default-menu": "^1.0.2",
     "electron-dl": "^3.0.2",
     "electron-updater": "^4.3.5",
     "glob": "^7.1.6",

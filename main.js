@@ -49,7 +49,7 @@ function initialize() {
     mainWindow = new BrowserWindow(WindowOptions);
 
     try {
-      mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD })
+      mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.npm_package_version })
     }
     catch {
       logger.error("Problème d'url lors du chargement de l'application")
