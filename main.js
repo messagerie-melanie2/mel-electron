@@ -15,8 +15,8 @@ log4js.configure({
 
 logger.info("Démarrage de l'application")
 
-require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
-// require('dotenv').config()
+// require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
+require('dotenv').config()
 
 if (!process.env.PATH_ARCHIVE) {  
   process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), process.env.ARCHIVE_FOLDER)
@@ -51,6 +51,7 @@ function initialize() {
       mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.VERSION_BUILD })
     }
     catch {
+      logger.error("Problème d'url lors du chargement de l'application")
       dialog.showMessageBox(null, {
         type: 'error',
         title: 'Erreur',
