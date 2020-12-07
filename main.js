@@ -86,6 +86,21 @@ function initialize() {
   })
 }
 
+//--------------------------------------------------------------------------------------------------
+// Auto updates
+//--------------------------------------------------------------------------------------------------
+const sendStatusToWindow = (text) => {
+  logger.info(text);
+  if (mainWindow) {
+    mainWindow.webContents.send('message', text);
+  }
+};
+
+autoUpdater.on('checking-for-update', () => {
+  sendStatusToWindow('Recherche de mise à jour...');
+})
+
+
 // Require each JS file in the main-process dir
 function loadApp() {
   const files = glob.sync(path.join(__dirname, 'main-process/*.js'))
