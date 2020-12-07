@@ -1,3 +1,4 @@
+require('update-electron-app')();
 const { app, BrowserWindow, dialog } = require('electron')
 const path = require('path')
 const glob = require('glob')
