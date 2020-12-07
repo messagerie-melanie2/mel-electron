@@ -1,3 +1,4 @@
+const { autoUpdater } = require("electron-updater")
 const { app, BrowserWindow, dialog } = require('electron')
 const path = require('path')
 const glob = require('glob')
@@ -15,13 +16,13 @@ log4js.configure({
 
 logger.info("Démarrage de l'application")
 
-// require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
-require('dotenv').config()
+require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
+// require('dotenv').config()
 
-if (!process.env.PATH_ARCHIVE) {  
+if (!process.env.PATH_ARCHIVE) {
   process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), process.env.ARCHIVE_FOLDER)
 }
-else  {
+else {
   process.env.PATH_ARCHIVE = path.join(process.env.PATH_ARCHIVE, process.env.ARCHIVE_FOLDER)
 }
 process.env.PATH_DB = path.join(app.getPath("userData"), 'archivage_mails.db');
@@ -68,6 +69,7 @@ function initialize() {
   }
 
   app.on('ready', () => {
+    autoUpdater.checkForUpdatesAndNotify();
     createWindow()
   })
 

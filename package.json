@@ -1,6 +1,6 @@
 {
   "build": {
-    "appId": "com.electron.mel",
+    "appId": "com.github.messagerie-melanie2.mel-electron",
     "extraResources": [
       {
         "from": "template/messagepreview.html",
@@ -32,14 +32,15 @@
   },
   "name": "Mel",
   "productName": "Messagerie Mel",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "Courrielleur nouvelle generation",
   "homepage": "https://github.com/messagerie-melanie2/mel-electron",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "postinstall": "electron-builder install-app-deps",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "publish": "electron-builder -p always"
   },
   "author": "AGoubs <arnaud.goubier@i-carre.net>",
   "license": "ISC",
@@ -55,6 +56,7 @@
     "electron-context-menu": "^2.3.0",
     "electron-db": "^1.0.0",
     "electron-dl": "^3.0.2",
+    "electron-updater": "^4.3.5",
     "glob": "^7.1.6",
     "jquery": "^3.5.0",
     "log4js": "^6.3.0",
