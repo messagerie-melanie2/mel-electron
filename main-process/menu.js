@@ -8,7 +8,7 @@ app.on('ready', () => {
 
     // Add custom menu
     menu.splice(4, 0, {
-        label: `Version ${process.env.npm_package_version}`,
+        label: `Version ${process.env.APPLICATION_VERSION}`,
     });
 
     // Set application menu

@@ -26,7 +26,8 @@ else {
   process.env.PATH_ARCHIVE = path.join(process.env.PATH_ARCHIVE, process.env.ARCHIVE_FOLDER)
 }
 process.env.PATH_DB = path.join(app.getPath("userData"), 'archivage_mails.db');
-process.env.PATH_LISTE_ARCHIVE = path.join(process.env.PATH_ARCHIVE, 'liste_archivage.json')
+process.env.PATH_LISTE_ARCHIVE = path.join(process.env.PATH_ARCHIVE, 'liste_archivage.json');
+process.env.APPLICATION_VERSION = process.env.npm_package_version;
 
 let mainWindow = null
 app.commandLine.appendSwitch('ignore-certificate-errors')
