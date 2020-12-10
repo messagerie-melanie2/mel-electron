@@ -5,6 +5,8 @@ const glob = require('glob')
 const fs = require('fs')
 const log4js = require("log4js");
 const logger = log4js.getLogger("main");
+const package = require("./package.json");
+
 log4js.configure({
   appenders: {
     everything: { type: 'file', filename: 'logs/logs.log', maxLogSize: 10485760, backups: 3, compress: true }
@@ -27,7 +29,7 @@ else {
 }
 process.env.PATH_DB = path.join(app.getPath("userData"), 'archivage_mails.db');
 process.env.PATH_LISTE_ARCHIVE = path.join(process.env.PATH_ARCHIVE, 'liste_archivage.json');
-process.env.APPLICATION_VERSION = process.env.npm_package_version;
+process.env.APPLICATION_VERSION = package.version;
 
 let mainWindow = null
 app.commandLine.appendSwitch('ignore-certificate-errors')
