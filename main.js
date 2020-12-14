@@ -5,7 +5,7 @@ const glob = require('glob')
 const fs = require('fs')
 const log4js = require("log4js");
 const logger = log4js.getLogger("main");
-const package = require("./package.json");
+const {version} = require("./package.json");
 
 log4js.configure({
   appenders: {
@@ -18,8 +18,8 @@ log4js.configure({
 
 logger.info("Démarrage de l'application")
 
-require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
-// require('dotenv').config()
+// require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
+require('dotenv').config()
 
 if (!process.env.PATH_ARCHIVE) {
   process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), process.env.ARCHIVE_FOLDER)
@@ -29,7 +29,7 @@ else {
 }
 process.env.PATH_DB = path.join(app.getPath("userData"), 'archivage_mails.db');
 process.env.PATH_LISTE_ARCHIVE = path.join(process.env.PATH_ARCHIVE, 'liste_archivage.json');
-process.env.APPLICATION_VERSION = package.version;
+process.env.APPLICATION_VERSION = version;
 
 let mainWindow = null
 app.commandLine.appendSwitch('ignore-certificate-errors')
