@@ -4,7 +4,7 @@ const utf7 = require('utf7').imap;
 const path = require('path');
 const fs = require('fs');
 const log4js = require("log4js");
-const logger = log4js.getLogger("functions");
+// const logger = log4js.getLogger("functions");
 const css = require('css');
 
 module.exports = {
@@ -17,7 +17,9 @@ module.exports = {
         BrowserWindow.getAllWindows()[0].send('new_folder');
       }
       return path_folder;
-    } catch (err) { logger.error(err) }
+    } catch (err) { 
+      // logger.error(err.message) 
+    }
   },
 
   traitementColsFile(file) {
@@ -25,14 +27,16 @@ module.exports = {
       try {
         new Promise((resolve) => {
           fs.readFile(file, 'utf8', (err, eml) => {
-            if (err) logger.error(err);
+            // if (err) logger.error(err);
             resolve(eml);
           });
         }).then((eml) => {
           resolve(mail.traitementCols(eml, file));
         })
       }
-      catch (err) { logger.error(err) }
+      catch (err) { 
+        // logger.error(err.message) 
+      }
     });
   },
 
@@ -93,7 +97,9 @@ module.exports = {
       }
       return html;
     }
-    catch (err) { logger.error(err) }
+    catch (err) { 
+      // logger.error(err.message) 
+    }
   },
 
   cleanLink(html) {
