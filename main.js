@@ -42,6 +42,7 @@ function initialize() {
       width: 800,
       height: 600,
       webPreferences: {
+        nativeWindowOpen: true,
         nodeIntegration: false,
         contextIsolation: true,
         enableRemoteModule: false,
