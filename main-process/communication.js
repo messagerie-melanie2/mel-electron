@@ -112,7 +112,6 @@ ipcMain.on('attachment_select', (event, value) => {
               fs.writeFileSync(response.filePath, result.content, (err) => {
                 // if (err) logger.error(err);
               })
-              shell.openPath(response.filePath);
             });
           }
         })
