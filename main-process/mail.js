@@ -170,7 +170,11 @@ module.exports = {
       mailparser.on("headers", function (headers) {
         subject = headers.get('subject');
         from = headers.get('from');
-        content_type = headers.get('content-type').value;
+        try {
+          content_type = headers.get('content-type').value;
+        } catch (error) {
+          content_type = "text/html";
+        }
         let date_fr = new Date(headers.get('date').getTime());
         try {
           resolve({ "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0, "content_type": content_type });
