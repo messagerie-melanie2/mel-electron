@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld(
     "api", {
     send: (channel, data) => {
         // whitelist channels
-        let validChannels = ["read_mail_dir", "mail_select", "eml_read", "attachment_select", "subfolder", "download_eml", "get_archive_folder", "search_list", "read_unread", "flag_unflagged", "stop-archivage", "delete_selected_mail"];
+        let validChannels = ["read_mail_dir", "mail_select", "eml_read", "attachment_select", "subfolder", "download_eml", "get_archive_folder", "search_list", "read_unread", "flag_unflagged", "stop-archivage", "delete_selected_mail", "import-archivage"];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
         }

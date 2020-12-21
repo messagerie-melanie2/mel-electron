@@ -113,13 +113,32 @@ module.exports = {
     }
   },
 
+  db_insert_archive_promise(element) {
+    try {
+      return new Promise((resolve, reject) => {
+        const db = new sqlite3.Database(process.env.PATH_DB);
+        db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, content_type, etiquettes) VALUES(?,?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, functions.getSubfolderFile(element.path_file), functions.getSubfolder(element.path_file), element.break, element.content_type, element.etiquettes, function (err) {
+          if (err) {
+            // logger.error(err.message);
+          }
+          else BrowserWindow.getAllWindows()[0].send('add_message_row', { id: this.lastID, subject: element.subject, fromto: element.fromto, date: element.date, content_type: element.content_type, mbox: functions.getSubfolder(element.path_file), etiquettes: element.etiquettes });
+        }).finalize();
+        resolve();
+        db.close();
+      });
+    }
+    catch (err) {
+      //  logger.error(err.message) 
+    }
+  },
+
   db_update_etiquettes(uid, etiquettes) {
     try {
       const db = new sqlite3.Database(process.env.PATH_DB);
       db.run("UPDATE cols SET etiquettes = ? WHERE id = ?", etiquettes, uid);
       db.close()
     }
-    catch (err) { 
+    catch (err) {
       // logger.error(err.message) 
     }
   },
@@ -130,7 +149,7 @@ module.exports = {
       db.run(`DELETE FROM cols WHERE id = ?`, uid);
       db.close()
     }
-    catch (err) { 
+    catch (err) {
       // logger.error(err.message) 
     }
   },
@@ -149,7 +168,7 @@ module.exports = {
         });
       })
     }
-    catch (err) { 
+    catch (err) {
       // logger.error(err.message) 
     }
   },
