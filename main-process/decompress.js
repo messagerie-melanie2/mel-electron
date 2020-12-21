@@ -27,7 +27,7 @@ function zipDecompress(event) {
                 //On retrouve le chemin de l'archive
                 let zip = result.filePaths[i].split('/').pop().split('-');
                 let zip_account = zip[1];
-                let zip_folder = zip[2].replace('.zip', '');
+                let zip_folder = zip[2].replace(/ \([0-9]+\)/g, '').replace('.zip', '');
                 let zip_folders = zip_folder.split('_');
 
                 let zip_path = path.join(process.env.PATH_ARCHIVE, path.join(zip_account, zip_folders.join(path.sep)))
