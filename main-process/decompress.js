@@ -1,8 +1,6 @@
 const { dialog, ipcMain } = require('electron');
 const DecompressZip = require('decompress-zip');
-const glob = require("glob")
 const path = require("path")
-const fs = require("fs")
 const functions = require('./functions.js');
 const db = require('./database.js');
 
