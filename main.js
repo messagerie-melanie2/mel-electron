@@ -21,9 +21,6 @@ const {version} = require("./package.json");
 // require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
 require('dotenv').config()
 
-let dotenv = require('dotenv').config({ path: '../../.env' });
-console.log(process.env.DB_HOST);
-
 if (!process.env.PATH_ARCHIVE) {
   process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), process.env.ARCHIVE_FOLDER)
 }
