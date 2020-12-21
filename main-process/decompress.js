@@ -8,7 +8,7 @@ const db = require('./database.js');
 
 
 
-ipcMain.on('import-archivage', (event, msg) => {
+ipcMain.on('import-archivage', (event) => {
     zipDecompress(event);
 });
 
@@ -55,6 +55,4 @@ function zipDecompress(event) {
     }).catch(err => {
         console.log(err)
     })
-
-    // fs.unlinkSync(result.filePaths[i])
 }
