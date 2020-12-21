@@ -51,6 +51,7 @@
   "dependencies": {
     "app": "^0.1.0",
     "css": "^3.0.0",
+    "decompress-zip": "^0.2.2",
     "dotenv": "^8.2.0",
     "dree": "^2.4.15",
     "electron-context-menu": "^2.3.0",
