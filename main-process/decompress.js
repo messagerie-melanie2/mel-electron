@@ -50,6 +50,14 @@ function zipDecompress(event) {
                         });
                     }
                 });
+                unzipper.on('error', function (err) {
+                    console.log('Caught an error', err);
+                    dialog.showMessageBox(null, {
+                        type: 'error',
+                        title: 'Erreur',
+                        message: "Erreur lors de l'importation de l'archive",
+                    });
+                });
             }
         }
     }).catch(err => {
