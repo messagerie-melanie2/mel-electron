@@ -6,12 +6,16 @@ const mail = require('./mail.js');
 const dree = require('dree');
 const path = require('path');
 const fs = require('fs');
-// const { parse, stringify } = require('envfile')
+const envfile = require('envfile')
 // const log4js = require("log4js");
 // const logger = log4js.getLogger("communication");
 
 ipcMain.on('change_archive_path', (event, result) => {
-
+  result = result.replace("\\" + process.env.ARCHIVE_FOLDER, "");
+  let parsedFile = envfile.parseFileSync(process.env.DOTENV_PATH);
+  parsedFile.PATH_ARCHIVE = result
+  fs.writeFileSync(process.env.DOTENV_PATH, envfile.stringifySync(parsedFile))
+  event.sender.send('change_archive_path_success')
 });
 
 ipcMain.on('new_archive_path', (event) => {
