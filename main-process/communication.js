@@ -29,7 +29,7 @@ ipcMain.on('new_archive_path', (event) => {
 
 ipcMain.on('create_folder', (event, result) => {
   if (result.path) {
-    fs.mkdirSync(path.join(result.path, result.name));
+    fs.mkdirSync(path.join(result.path, result.name), { recursive: true });
   }
 });
 
