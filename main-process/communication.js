@@ -6,8 +6,13 @@ const mail = require('./mail.js');
 const dree = require('dree');
 const path = require('path');
 const fs = require('fs');
-const log4js = require("log4js");
+// const { parse, stringify } = require('envfile')
+// const log4js = require("log4js");
 // const logger = log4js.getLogger("communication");
+
+ipcMain.on('change_archive_path', (event, result) => {
+
+});
 
 ipcMain.on('new_archive_path', (event) => {
   dialog.showOpenDialog({
@@ -28,7 +33,7 @@ ipcMain.on('delete_folder', (event, result) => {
   fs.rmdirSync(result, { recursive: true });
 });
 
-ipcMain.on('get_archive_path', (event) => {  
+ipcMain.on('get_archive_path', (event) => {
   event.sender.send('archive_path', process.env.PATH_ARCHIVE);
 })
 
