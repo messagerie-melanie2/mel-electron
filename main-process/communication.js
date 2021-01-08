@@ -9,6 +9,28 @@ const fs = require('fs');
 const log4js = require("log4js");
 // const logger = log4js.getLogger("communication");
 
+ipcMain.on('new_archive_path', (event) => {
+  dialog.showOpenDialog({
+    title: "Sélectionner votre archive à décompresser",
+    properties: ['openDirectory'],
+  }).then(result => {
+    event.sender.send('new_archive_path_result', result)
+  })
+});
+
+ipcMain.on('create_folder', (event, result) => {
+  if (result.path) {
+    fs.mkdirSync(path.join(result.path, result.name));
+  }
+});
+
+ipcMain.on('delete_folder', (event, result) => {
+  fs.rmdirSync(result, { recursive: true });
+});
+
+ipcMain.on('get_archive_path', (event) => {  
+  event.sender.send('archive_path', process.env.PATH_ARCHIVE);
+})
 
 // Envoi le nom du dossier d'archive au plugin electron 
 ipcMain.on('get_archive_folder', (event, msg) => {
@@ -49,18 +71,18 @@ ipcMain.on('mail_select', (event, uid) => {
       }
 
       db.db_mail_select(uid).then((row) => {
-        try {          
+        try {
           let eml = fs.readFileSync(path.join(process.env.PATH_ARCHIVE, row.path_file), 'utf8');
           mail.traitementMail(eml).then((mail_content) => {
             let html = mail.constructionMail(mail_content, data, uid);
-            
+
             html = functions.cleanCss(html);
             html = functions.cleanLink(html);
-            
+
             event.sender.send('mail_return', html);
           })
         }
-        catch (err) { 
+        catch (err) {
           // logger.error(err.message) 
         }
       });
@@ -148,6 +170,7 @@ ipcMain.on('download_eml', (events, data) => {
         try {
           download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
         } catch (err) {
+          console.log(err);
           // logger.error(err)
         }
       }
@@ -207,15 +230,15 @@ ipcMain.on('delete_selected_mail', (events, uids) => {
       rows.forEach(row => {
         try {
           fs.unlinkSync(path.join(process.env.PATH_ARCHIVE, row.path_file));
-        } 
-        catch (error) { 
+        }
+        catch (error) {
           // logger.error('Erreur de suppression du fichier : ' + row.path_file); 
         }
         db.db_delete_selected_mail(row.id);
       });
     })
   }
-  catch (err) { 
+  catch (err) {
     // logger.error(err.message) 
   }
 })
