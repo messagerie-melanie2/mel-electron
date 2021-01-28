@@ -4,19 +4,19 @@ const path = require('path')
 const glob = require('glob')
 const fs = require('fs')
 const log4js = require("log4js");
-// const logger = log4js.getLogger("main");
+const logger = log4js.getLogger("main");
 const {version} = require("./package.json");
 
-// log4js.configure({
-//   appenders: {
-//     everything: { type: 'file', filename: 'logs/logs.log', maxLogSize: 10485760, backups: 3, compress: true }
-//   },
-//   categories: {
-//     default: { appenders: ['everything'], level: 'debug' }
-//   }
-// });
+log4js.configure({
+  appenders: {
+    everything: { type: 'file', filename: 'logs/logs.log', maxLogSize: 10485760, backups: 3, compress: true }
+  },
+  categories: {
+    default: { appenders: ['everything'], level: 'debug' }
+  }
+});
 
-// logger.info("Démarrage de l'application")
+logger.info("Démarrage de l'application")
 
 require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
 // require('dotenv').config()
@@ -57,7 +57,7 @@ function initialize() {
       mainWindow.loadURL(process.env.LOAD_PATH, { userAgent: 'Mel_Electron V.' + process.env.npm_package_version })
     }
     catch {
-      // logger.error("Problème d'url lors du chargement de l'application")
+      logger.error("Problème d'url lors du chargement de l'application")
       dialog.showMessageBox(null, {
         type: 'error',
         title: 'Erreur',
@@ -67,7 +67,7 @@ function initialize() {
     mainWindow.maximize()
 
     mainWindow.on('closed', () => {
-      // logger.info("Arrêt de l'application")
+      logger.info("Arrêt de l'application")
       log4js.shutdown
       mainWindow = null
     })
@@ -95,7 +95,6 @@ function initialize() {
 // Auto updates
 //--------------------------------------------------------------------------------------------------
 const sendStatusToWindow = (text) => {
-  // logger.info(text);
   if (mainWindow) {
     mainWindow.webContents.send('message', text);
   }

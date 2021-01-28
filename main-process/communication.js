@@ -7,8 +7,8 @@ const dree = require('dree');
 const path = require('path');
 const fs = require('fs');
 const envfile = require('envfile')
-// const log4js = require("log4js");
-// const logger = log4js.getLogger("communication");
+const log4js = require("log4js");
+const logger = log4js.getLogger("communication");
 
 ipcMain.on('change_archive_path', (event, result) => {
   result = result.replace("\\" + process.env.ARCHIVE_FOLDER, "");
@@ -16,6 +16,7 @@ ipcMain.on('change_archive_path', (event, result) => {
   parsedFile.PATH_ARCHIVE = result
   fs.writeFileSync(process.env.DOTENV_PATH, envfile.stringifySync(parsedFile))
   event.sender.send('change_archive_path_success')
+  logger.info(`Changement du chemin du dossier des archives : ${result}`)
 });
 
 ipcMain.on('new_archive_path', (event) => {
@@ -75,7 +76,7 @@ ipcMain.on('mail_select', (event, uid) => {
     const template = (process.env.DEV_MODE == "Dev") ? 'template/messagepreview.html' : path.join(process.resourcesPath, 'template/messagepreview.html');
     fs.readFile(template, (err, data) => {
       if (err) {
-        // logger.error(err)
+        logger.error(err)
         return
       }
 
@@ -92,7 +93,7 @@ ipcMain.on('mail_select', (event, uid) => {
           })
         }
         catch (err) {
-          // logger.error(err.message) 
+          logger.error(err.message) 
         }
       });
     })
@@ -129,7 +130,7 @@ ipcMain.on('attachment_select', (event, value) => {
           //Si on ouvre
           if (response.response === 1) {
             fs.writeFileSync(path, result.content, (err) => {
-              // if (err) logger.error(err);
+              if (err) logger.error(err);
             })
             shell.openPath(path);
           }
@@ -141,7 +142,7 @@ ipcMain.on('attachment_select', (event, value) => {
             }
             dialog.showSaveDialog(null, options).then(response => {
               fs.writeFileSync(response.filePath, result.content, (err) => {
-                // if (err) logger.error(err);
+                if (err) logger.error(err);
               })
             });
           }
@@ -164,7 +165,7 @@ ipcMain.on('download_eml', (events, data) => {
   //Si une liste de téléchargement est envoyée on réécrit dans le fichier, sinon on le lit pour finir l'archivage précédent
   if (data.files) {
     fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(data.files));
-    // logger.info("Debut de l'archivage")
+    logger.info("Debut de l'archivage")
   }
   if (fs.existsSync(process.env.PATH_LISTE_ARCHIVE)) {
     //On récupère les données de l'archivage
@@ -180,7 +181,7 @@ ipcMain.on('download_eml', (events, data) => {
           download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
         } catch (err) {
           console.log(err);
-          // logger.error(err)
+          logger.error(err)
         }
       }
       else {
@@ -203,6 +204,7 @@ ipcMain.on('download_eml', (events, data) => {
             if (file_data.length > 0) {
               //Si on arrête l'archivage
               if (process.env.ARRET_ARCHIVAGE != 0) {
+                logger.info("Arrêt de l'archivage")
                 process.env.ARRET_ARCHIVAGE = 0;
                 file_data = [];
                 fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
@@ -215,17 +217,18 @@ ipcMain.on('download_eml', (events, data) => {
                 try {
                   download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
                 } catch (err) {
-                  // logger.error(err)
+                  logger.error(err)
                 }
               }
             }
             else {
               fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
+              logger.info("Fin de l'archivage")            
               events.sender.send('download-finish');
               session.defaultSession.removeAllListeners();
             }
           } else {
-            // logger.error(`Téléchargement échoué : ${state}`)
+            logger.error(`Téléchargement échoué : ${state}`)
           }
         })
       })
@@ -241,14 +244,14 @@ ipcMain.on('delete_selected_mail', (events, uids) => {
           fs.unlinkSync(path.join(process.env.PATH_ARCHIVE, row.path_file));
         }
         catch (error) {
-          // logger.error('Erreur de suppression du fichier : ' + row.path_file); 
+          logger.error('Erreur de suppression du fichier : ' + row.path_file); 
         }
         db.db_delete_selected_mail(row.id);
       });
     })
   }
   catch (err) {
-    // logger.error(err.message) 
+    logger.error(err.message) 
   }
 })
 

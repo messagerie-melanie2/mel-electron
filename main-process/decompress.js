@@ -68,7 +68,7 @@ function zipDecompress(event) {
             }
         }
     }).catch(err => {
-        console.log(err)
+        logger.error(err.message) 
     })
 }
 

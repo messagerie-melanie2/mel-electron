@@ -2,7 +2,7 @@ const { BrowserWindow } = require('electron');
 const sqlite3 = require('sqlite3').verbose();
 const functions = require('./functions.js');
 const log4js = require("log4js");
-// const logger = log4js.getLogger("database");
+const logger = log4js.getLogger("database");
 
 (function createDB() {
   const db = new sqlite3.Database(process.env.PATH_DB);
@@ -30,7 +30,7 @@ module.exports = {
       })
     }
     catch (err) {
-      // logger.error(err) 
+      logger.error(err) 
     }
   },
 
@@ -51,7 +51,7 @@ module.exports = {
       })
     }
     catch (err) {
-      // logger.error(err.message) 
+      logger.error(err.message) 
     }
   },
 
@@ -72,7 +72,7 @@ module.exports = {
       })
     }
     catch (err) {
-      // logger.error(err.message) 
+      logger.error(err.message) 
     }
   },
 
@@ -93,7 +93,7 @@ module.exports = {
       })
     }
     catch (err) {
-      // logger.error(err.message)
+      logger.error(err.message)
     }
   },
 
@@ -102,14 +102,14 @@ module.exports = {
       const db = new sqlite3.Database(process.env.PATH_DB);
       db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, content_type, etiquettes) VALUES(?,?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, functions.getSubfolderFile(element.path_file), functions.getSubfolder(element.path_file), element.break, element.content_type, element.etiquettes, function (err) {
         if (err) {
-          // logger.error(err.message);
+          logger.error(err.message);
         }
         else BrowserWindow.getAllWindows()[0].send('add_message_row', { id: this.lastID, subject: element.subject, fromto: element.fromto, date: element.date, content_type: element.content_type, mbox: functions.getSubfolder(element.path_file), etiquettes: element.etiquettes });
       }).finalize();
       db.close();
     }
     catch (err) {
-      //  logger.error(err.message) 
+       logger.error(err.message) 
     }
   },
 
@@ -119,7 +119,7 @@ module.exports = {
         const db = new sqlite3.Database(process.env.PATH_DB);
         db.prepare("INSERT INTO cols(id, subject, fromto, date, path_file, subfolder, break, content_type, etiquettes) VALUES(?,?,?,?,?,?,?,?,?)").run(null, element.subject, element.fromto, element.date, functions.getSubfolderFile(element.path_file), functions.getSubfolder(element.path_file), element.break, element.content_type, element.etiquettes, function (err) {
           if (err) {
-            // logger.error(err.message);
+            logger.error(err.message);
           }
           else BrowserWindow.getAllWindows()[0].send('add_message_row', { id: this.lastID, subject: element.subject, fromto: element.fromto, date: element.date, content_type: element.content_type, mbox: functions.getSubfolder(element.path_file), etiquettes: element.etiquettes });
         }).finalize();
@@ -128,7 +128,7 @@ module.exports = {
       });
     }
     catch (err) {
-      //  logger.error(err.message) 
+       logger.error(err.message) 
     }
   },
 
@@ -139,7 +139,7 @@ module.exports = {
       db.close()
     }
     catch (err) {
-      // logger.error(err.message) 
+      logger.error(err.message) 
     }
   },
 
@@ -150,7 +150,7 @@ module.exports = {
       db.close()
     }
     catch (err) {
-      // logger.error(err.message) 
+      logger.error(err.message) 
     }
   },
 
@@ -160,7 +160,7 @@ module.exports = {
         const db = new sqlite3.Database(process.env.PATH_DB);
         db.all('SELECT id, path_file FROM cols WHERE id IN ( ' + uids.map(function () { return '?' }).join(',') + ' )', uids, (err, row) => {
           if (err) {
-            // reject(logger.error(err.message))
+            reject(logger.error(err.message))
           }
           else {
             resolve(row)
@@ -169,7 +169,7 @@ module.exports = {
       })
     }
     catch (err) {
-      // logger.error(err.message) 
+      logger.error(err.message) 
     }
   },
 }
