@@ -16,13 +16,7 @@ ipcMain.on('account_electron', (event, account) => {
 })
 
 ipcMain.on('log_export', (event, result) => {
-  const options = {
-    properties: ['openFile'],
-    defaultPath: app.getPath('logs'),
-  }
-  dialog.showSaveDialog(null, options, (path) => {
-    console.log(path);
-  });
+  shell.openPath(app.getPath('logs'))
 })
 
 ipcMain.on('change_archive_path', (event, result) => {
