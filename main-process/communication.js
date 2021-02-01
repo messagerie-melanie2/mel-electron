@@ -10,6 +10,21 @@ const envfile = require('envfile')
 const log4js = require("log4js");
 const logger = log4js.getLogger("communication");
 
+ipcMain.on('account_electron', (event, account) => {
+  logger.info(`Chemin du dossier des archives : ${process.env.PATH_ARCHIVE}`)
+  logger.info(`Utilisateur : ${account}`)
+})
+
+ipcMain.on('log_export', (event, result) => {
+  const options = {
+    properties: ['openFile'],
+    defaultPath: app.getPath('logs'),
+  }
+  dialog.showSaveDialog(null, options, (path) => {
+    console.log(path);
+  });
+})
+
 ipcMain.on('change_archive_path', (event, result) => {
   result = result.replace("\\" + process.env.ARCHIVE_FOLDER, "");
   let parsedFile = envfile.parseFileSync(process.env.DOTENV_PATH);
@@ -48,7 +63,7 @@ ipcMain.on('get_archive_folder', (event, msg) => {
 });
 
 // Envoi la liste des sous-dossier dans le dossier des archives de mails
-ipcMain.on('subfolder', (event, msg) => {
+ipcMain.on('subfolder', (event) => {
   const options = {
     extensions: []
   }
@@ -93,7 +108,7 @@ ipcMain.on('mail_select', (event, uid) => {
           })
         }
         catch (err) {
-          logger.error(err.message) 
+          logger.error(err.message)
         }
       });
     })
@@ -180,8 +195,7 @@ ipcMain.on('download_eml', (events, data) => {
         try {
           download(events.sender, path.join(process.env.LOAD_PATH, file.url.concat(`&_token=${token}`)), { directory: path_folder })
         } catch (err) {
-          console.log(err);
-          logger.error(err)
+          logger.error(err);
         }
       }
       else {
@@ -223,7 +237,7 @@ ipcMain.on('download_eml', (events, data) => {
             }
             else {
               fs.writeFileSync(process.env.PATH_LISTE_ARCHIVE, JSON.stringify(file_data));
-              logger.info("Fin de l'archivage")            
+              logger.info("Fin de l'archivage")
               events.sender.send('download-finish');
               session.defaultSession.removeAllListeners();
             }
@@ -244,14 +258,14 @@ ipcMain.on('delete_selected_mail', (events, uids) => {
           fs.unlinkSync(path.join(process.env.PATH_ARCHIVE, row.path_file));
         }
         catch (error) {
-          logger.error('Erreur de suppression du fichier : ' + row.path_file); 
+          logger.error('Erreur de suppression du fichier : ' + row.path_file);
         }
         db.db_delete_selected_mail(row.id);
       });
     })
   }
   catch (err) {
-    logger.error(err.message) 
+    logger.error(err.message)
   }
 })
 
