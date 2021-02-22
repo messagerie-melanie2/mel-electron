@@ -10,6 +10,14 @@ const envfile = require('envfile')
 const log4js = require("log4js");
 const logger = log4js.getLogger("communication");
 
+ipcMain.on('set_local_users_list', (event, users) => {
+  process.env.LOCAL_USERS_LIST = users;
+});
+
+ipcMain.on('get_local_users_list', (event) => {
+  event.sender.send('local_users_list', process.env.LOCAL_USERS_LIST.split(","))
+});
+
 ipcMain.on('account_electron', (event, account) => {
   logger.info(`Chemin du dossier des archives : ${process.env.PATH_ARCHIVE}`)
   logger.info(`Utilisateur : ${account}`)
