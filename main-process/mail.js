@@ -175,7 +175,7 @@ module.exports = {
         } catch (error) {
           content_type = "text/html";
         }
-        let date_fr = new Date(headers.get('date').getTime());
+        let date_fr = new Date(headers.get('date'));
         try {
           resolve({ "subject": subject, "fromto": from.value[0].name, "date": date_fr, "path_file": path_file, "break": 0, "content_type": content_type });
         }
