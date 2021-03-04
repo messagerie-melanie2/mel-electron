@@ -16,6 +16,8 @@ log4js.configure({
   }
 });
 
+autoUpdater.autoInstallOnAppQuit = false;
+
 logger.info("Démarrage de l'application")
 
 // require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
@@ -94,25 +96,20 @@ function initialize() {
 //--------------------------------------------------------------------------------------------------
 // Auto updates
 //--------------------------------------------------------------------------------------------------
-const sendStatusToWindow = (text) => {
-  if (mainWindow) {
-    mainWindow.webContents.send('message', text);
-  }
-};
+autoUpdater.on('update-downloaded', (info) => {
+  const options = {
+    type: 'question',
+    buttons: ['Non', 'Oui'],
+    title: "Nouvelle mise à jour",
+    message: "Une nouvelle mise à jour d'Electron a été trouvée. Voulez-vous mettre à jour le client maintenant ?",
+  };
 
-autoUpdater.on('checking-for-update', () => {
-  sendStatusToWindow('Recherche de mise à jour...');
+  dialog.showMessageBox(null, options).then(response => {
+    if (response.response === 1) {
+      autoUpdater.quitAndInstall();
+    }
+  })
 })
-autoUpdater.on('update-available', () => {
-  sendStatusToWindow('Mise à jour disponible');
-})
-autoUpdater.on('update-not-available', () => {
-  sendStatusToWindow('Pas de mise à jour disponible');
-})
-autoUpdater.on('error', err => {
-  sendStatusToWindow(`Erreur de la mise à jour automatique ${err.toString()}`);
-})
-
 
 // Require each JS file in the main-process dir
 function loadApp() {
@@ -129,8 +126,3 @@ function createArchiveFolder() {
 initialize()
 createArchiveFolder()
 
-
-//-------Auto-update--------
-autoUpdater.on('update-downloaded', info => {
-  autoUpdater.quitAndInstall();
-})
