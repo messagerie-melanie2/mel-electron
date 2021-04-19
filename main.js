@@ -20,8 +20,8 @@ autoUpdater.autoInstallOnAppQuit = false;
 
 logger.info("Démarrage de l'application")
 
-// require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
-require('dotenv').config()
+require('dotenv').config({ path: path.join(process.resourcesPath, '.env') })
+// require('dotenv').config()
 
 if (!process.env.PATH_ARCHIVE) {
   process.env.PATH_ARCHIVE = path.join(app.getPath("userData"), process.env.ARCHIVE_FOLDER)
