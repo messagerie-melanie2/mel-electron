@@ -14,7 +14,7 @@
     "win": {
       "icon": "icons/mel.ico",
       "target": "nsis",
-      "requestedExecutionLevel": "user"
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "linux": {
       "category": "Utility",
