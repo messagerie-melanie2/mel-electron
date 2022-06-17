@@ -43,7 +43,7 @@
   "author": "AGoubs <arnaud.goubier@i-carre.net>",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^9.3.1",
+    "electron": "^15.5.5",
     "electron-builder": "^22.7.0"
   },
   "dependencies": {
