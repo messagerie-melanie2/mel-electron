@@ -62,7 +62,7 @@
     "jquery": "^3.5.0",
     "log4js": "^6.3.0",
     "mailparser": "^2.8.1",
-    "sqlite3": "^5.0.0",
+    "sqlite3": "^5.0.3",
     "underscore": "^1.10.2",
     "utf7": "^1.0.2"
   }
